@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+  --cream: #FEFBF6;
+  --beige: #F5F0E8;
+  --green-warm: #5B8C5A;
+  --green-light: #E8F5E9;
+}
+
+* { font-family: 'Noto Sans KR', sans-serif; }
+
+body {
+  background: var(--cream);
+  color: #3D3929;
+}
+
+@layer components {
+  /* Warm card */
+  .card-warm {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(139, 119, 90, 0.08);
+  }
+
+  /* Inquiry form styles */
+  .inquiry-input {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #E8D5C4;
+    background: white;
+    padding: 0.75rem 1rem;
+    color: #374151;
+  }
+  .inquiry-input:focus {
+    border-color: #7BAE7F;
+    outline: none;
+    box-shadow: 0 0 0 2px #E8F5E9;
+  }
+  .inquiry-input::placeholder {
+    color: #9CA3AF;
+  }
+
+  .inquiry-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #4B5563;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn-warm {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    cursor: pointer;
+  }
+  .btn-warm:hover {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .btn-primary {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    background: #5B8C5A;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover {
+    background: #3D6B3D;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .btn-outline {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 2px solid #5B8C5A;
+    color: #5B8C5A;
+    background: transparent;
+    cursor: pointer;
+  }
+  .btn-outline:hover {
+    background: #E8F5E9;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  /* Warm accent divider */
+  .warm-divider {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #E8A87C, #FFD592, #E8A87C, transparent);
+    border: none;
+    border-radius: 2px;
+  }
+
+  /* Summer warmth card */
+  .card-summer {
+    background: linear-gradient(180deg, #FFFDF7 0%, #FFF9EE 100%);
+    border: 1px solid rgba(232, 168, 124, 0.15);
+  }
+}
+
+/* Hero gradient — warm summer sunset + green leaves */
+.hero-gradient {
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(255, 183, 77, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(255, 223, 148, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(139, 195, 74, 0.2) 0%, transparent 50%),
+    linear-gradient(165deg, #4A7C59 0%, #5B8C5A 25%, #6B9B5A 50%, #8DB580 75%, #A8C898 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sun rays */
+.hero-gradient::before {
+  content: '';
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(255, 218, 121, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Floating leaves */
+.hero-gradient::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M40 180 Q20 120 60 80 Q100 40 50 10' fill='none' stroke='rgba(255,255,255,0.06)' stroke-width='1.5'/%3E%3Cpath d='M160 20 Q180 80 140 120 Q100 160 150 190' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3Ccircle cx='170' cy='50' r='3' fill='rgba(255,255,255,0.08)'/%3E%3Ccircle cx='30' cy='150' r='4' fill='rgba(255,255,255,0.06)'/%3E%3Ccircle cx='100' cy='30' r='2' fill='rgba(255,255,255,0.1)'/%3E%3C/svg%3E");
+  background-size: 400px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Leaf decoration for sections */
+.leaf-pattern {
+  position: relative;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 10 Q30 50 60 110 Q90 50 60 10Z' fill='%235B8C5A' fill-opacity='0.03'/%3E%3Ccircle cx='60' cy='60' r='1.5' fill='%235B8C5A' fill-opacity='0.04'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M30 80 Q50 60 80 70 Q100 80 90 50' fill='none' stroke='%235B8C5A' stroke-width='0.5' stroke-opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 120px 120px, 180px 180px;
+  background-position: 0 0, 90px 60px;
+}

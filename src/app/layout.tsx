@@ -5,7 +5,7 @@ import FloatingHome from '@/components/FloatingHome';
 
 export const metadata: Metadata = {
   title: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
-  description: '다사랑 간병공동체 - 제천지역자활센터',
+  description: '다사랑 간병공동체 - 제천지역자활센터',  verification: { other: { 'naver-site-verification': '4fefec1c7f3e6bb643de0d9eeadb2f856e8406de' } },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -78,8 +78,8 @@ export default function FloatingKakao() {
       {/* Button */}
       <button
         onClick={handleClick}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseEnter={(e) => { setShowTooltip(true); e.currentTarget.style.transform = 'scale(1.1)'; }}
+        onMouseLeave={(e) => { setShowTooltip(false); e.currentTarget.style.transform = 'scale(1)'; }}
         style={{
           width: '3.5rem',
           height: '3.5rem',
@@ -95,8 +95,6 @@ export default function FloatingKakao() {
           transition: 'transform 0.2s',
           WebkitTapHighlightColor: 'transparent',
         }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
         onTouchStart={e => e.currentTarget.style.transform = 'scale(0.95)'}
         onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
       >

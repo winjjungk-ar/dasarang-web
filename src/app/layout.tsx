@@ -11,7 +11,23 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body style={{
+    <header style={{
+  position: 'fixed',
+  top: 0,
+  right: 0,
+  zIndex: 50,
+  background: 'rgba(74,124,89,0.95)',
+  backdropFilter: 'blur(8px)',
+  color: 'white',
+  padding: '0.75rem 1.5rem',
+  fontSize: '1rem',
+  fontWeight: 600,
+  borderRadius: '0 0 0 12px',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+}}>
+  🌿 제천 다사랑간병
+</header>
+       <body style={{
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',

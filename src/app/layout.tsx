@@ -5,41 +5,41 @@ import FloatingHome from '@/components/FloatingHome';
 
 export const metadata: Metadata = {
   title: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
-  description: '다사랑 간병공동체 - 제천지역자활센터',  verification: { other: { 'naver-site-verification': '4fefec1c7f3e6bb643de0d9eeadb2f856e8406de' } },
+  description: '다사랑 간병공동체 - 제천지역자활센터',
+  verification: { other: { 'naver-site-verification': '4fefec1c7f3e6bb643de0d9eeadb2f856e8406de' } },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-    <header style={{
-  position: 'fixed',
-  top: 0,
-  right: 0,
-  zIndex: 50,
-  background: 'rgba(74,124,89,0.95)',
-  backdropFilter: 'blur(8px)',
-  color: 'white',
-  padding: '0.75rem 1.5rem',
-  fontSize: '1rem',
-  fontWeight: 600,
-  borderRadius: '0 0 0 12px',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-}}>
-  🌿 제천 다사랑간병
-</header>
-       <body style={{
+      <body style={{
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         background: 'linear-gradient(180deg, #FEFBF6 0%, #FFF9EE 30%, #F5F0E8 100%)',
         backgroundAttachment: 'fixed',
       }}>
+        <header style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          zIndex: 50,
+          background: 'rgba(74,124,89,0.95)',
+          backdropFilter: 'blur(8px)',
+          color: 'white',
+          padding: '0.75rem 1.5rem',
+          fontSize: '1rem',
+          fontWeight: 600,
+          borderRadius: '0 0 0 12px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        }}>
+          🌿 제천 다사랑간병
+        </header>
         <main style={{ flex: 1 }}>{children}</main>
         <ToastProvider />
-                <FloatingHome />
+        <FloatingHome />
         <FloatingKakao />
 
-        {/* Footer */}
         <footer style={{ background: '#4A7C59', color: 'rgba(255,255,255,0.8)' }}>
           <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '3rem 1rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem' }}>

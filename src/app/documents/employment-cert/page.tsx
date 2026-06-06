@@ -103,8 +103,10 @@ export default function EmploymentCertPage() {
     printWindow.document.close();
     // 모바일: print()가 논블로킹이라 자동 닫기 하면 인쇄 전에 창이 닫힘
     printWindow.focus();
-    printWindow.print();
-    // afterprint 이벤트로 인쇄 완료 후 닫기
+    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
+    setTimeout(() => {
+      printWindow.print();
+    }, 200);
     printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 

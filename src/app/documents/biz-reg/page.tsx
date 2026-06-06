@@ -26,9 +26,11 @@ export default function BizRegPage() {
 </html>`);
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
-  };
+    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
+    setTimeout(() => {
+      printWindow.print();
+    }, 200);
+    printWindow.onafterprint
 
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '1rem' }}>

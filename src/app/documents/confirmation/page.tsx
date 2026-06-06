@@ -144,8 +144,11 @@ export default function ConfirmationPage() {
     const name = patientName || '환자';
     const docTitle = `${today}_${name}_사용확인서`;
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // iframe 방식 — 팝업 차단 우회
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    const printWindow = iframe.contentWindow!;
 
     const timeRows = timeEntries.map(e => {
       const d = new Date(e.date + 'T00:00:00');
@@ -261,7 +264,7 @@ export default function ConfirmationPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
   };
 
   // ── 저장 함수 ──

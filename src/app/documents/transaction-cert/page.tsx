@@ -87,8 +87,11 @@ export default function TransactionCertPage() {
     const name = patientName || '환자';
     const docTitle = `${today}_${name}_거래명세서`;
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // iframe 방식 — 팝업 차단 우회
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    const printWindow = iframe.contentWindow!;
 
     const now = new Date();
     const todayStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
@@ -193,7 +196,7 @@ export default function TransactionCertPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '4rem', color: '#999' }}>⏳ 로딩 중...</div>;

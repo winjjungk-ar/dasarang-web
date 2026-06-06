@@ -94,8 +94,11 @@ export default function CareLogPage() {
     const today = new Date().toISOString().split('T')[0];
     const docTitle = `${today}_${patientName || '환자'}_간병일지`;
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // iframe 방식 — 팝업 차단 우회
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    const printWindow = iframe.contentWindow!;
 
     // 날짜 포맷 헬퍼 (인쇄용 HTML 내에서 사용)
     const fmtPrint = (d: string) => {
@@ -235,7 +238,7 @@ export default function CareLogPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
   };
 
   // ── 저장 함수 ──

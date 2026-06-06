@@ -4,8 +4,11 @@ import { useState } from 'react';
 
 export default function BizRegPage() {
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // iframe 방식 — 팝업 차단 우회
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    const printWindow = iframe.contentWindow!;
 
     printWindow.document.write(`<!DOCTYPE html>
 <html>
@@ -30,7 +33,7 @@ export default function BizRegPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
   };
 
   return (

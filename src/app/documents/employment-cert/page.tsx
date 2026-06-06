@@ -26,8 +26,11 @@ export default function EmploymentCertPage() {
     const name = caregiverName || '재직증명서';
     const docTitle = `${today}_${name}_재직증명서`;
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // iframe 방식 — 팝업 차단 우회
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    const printWindow = iframe.contentWindow!;
 
     // mm 단위 고정 — rem 의존 제거 (Android rem 기준 불확실)
     printWindow.document.write(`<!DOCTYPE html>
@@ -107,7 +110,7 @@ export default function EmploymentCertPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
   };
 
   const formatDate = (dateStr: string) => {

@@ -14,7 +14,7 @@
 * { font-family: 'Noto Sans KR', sans-serif; }
 
 body {
-  background: var(--cream);
+  background: linear-gradient(180deg, #FEFBF6 0%, #FFF9EE 30%, #F5F0E8 100%);
   color: #3D3929;
   /* 모바일 대응: fixed header 밀림 방지 + 터치 최적화 */
   padding-top: 0;
@@ -35,6 +35,25 @@ body {
 
 @media (max-width: 480px) {
   html { font-size: 14px; }
+}
+
+/* ── 프린트 글로벌 (모바일 PDF 검은 배경 방지) ── */
+@media print {
+  html, body {
+    background: white !important;
+    background-image: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  body > div {
+    background: white !important;
+    background-image: none !important;
+  }
+  body {
+    padding-top: 0 !important;
+    margin: 0 !important;
+  }
+  .no-print { display: none !important; }
 }
 
 @layer components {

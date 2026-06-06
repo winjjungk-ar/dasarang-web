@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc as fireDoc } from 'firebase/firestore';
 import { getCaregivers, type Caregiver, getPatients, type Patient } from '@/lib/caregiverStore';
-import SignaturePad, { SignaturePrint } from '@/components/SignaturePad';
+import SignaturePad from '@/components/SignaturePad';
 
 const TASKS = ['식사보조', '활동보조', '배변보조', '위생보조', '기타'];
 
@@ -92,10 +92,147 @@ export default function CareLogPage() {
 
   const handlePrint = () => {
     const today = new Date().toISOString().split('T')[0];
-    const prev = document.title;
-    document.title = `${today}_${patientName || '환자'}_간병일지`;
-    window.print();
-    setTimeout(() => { document.title = prev; }, 500);
+    const docTitle = `${today}_${patientName || '환자'}_간병일지`;
+
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { window.print(); return; }
+
+    // 날짜 포맷 헬퍼 (인쇄용 HTML 내에서 사용)
+    const fmtPrint = (d: string) => {
+      if (!d) return '';
+      const dt = new Date(d + 'T00:00:00');
+      return `${dt.getFullYear()}년 ${dt.getMonth() + 1}월 ${dt.getDate()}일`;
+    };
+    const birthPrint = birthDate ? (() => {
+      const d = new Date(birthDate + 'T00:00:00');
+      return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+    })() : '';
+    const genderPrint = gender === '남' ? '남' : gender === '여' ? '여' : '';
+
+    // 일별 근무 테이블 행 생성
+    const dailyRows = dateList.map((date, i) => {
+      const log = dailyLogs[date] || { startTime: '', endTime: '', tasks: [] };
+      const dur = calcDuration(log.startTime, log.endTime);
+      const checkedTasks = TASKS.filter(t => log.tasks.includes(t));
+      const taskText = checkedTasks.length > 0 ? checkedTasks.join(', ') : '';
+      const timeDisplay = log.startTime && log.endTime
+        ? `${log.startTime}시 ~ ${log.endTime}시`
+        : log.startTime ? `${log.startTime}시 ~` : log.endTime ? `~ ${log.endTime}시` : '';
+      return `<tr style="background:${i % 2 === 0 ? '#FAFAFA' : 'white'}">
+        <td style="border:1px solid #999;padding:2mm 3mm;font-size:3.5mm;text-align:center;vertical-align:middle;">${fmtShort(date)}</td>
+        <td style="border:1px solid #999;padding:2mm 3mm;font-size:3.5mm;text-align:center;vertical-align:middle;">${timeDisplay}</td>
+        <td style="border:1px solid #999;padding:2mm 3mm;font-size:3.5mm;text-align:center;vertical-align:middle;font-weight:600;color:#4A7C59;">${dur}</td>
+        <td style="border:1px solid #999;padding:2mm 3mm;font-size:3.5mm;text-align:center;vertical-align:middle;">${taskText}</td>
+      </tr>`;
+    }).join('');
+
+    // 총 근무시간 계산
+    let totalH = 0;
+    dateList.forEach(d => {
+      const log = dailyLogs[d];
+      if (log?.startTime && log?.endTime) {
+        let h = parseInt(log.endTime) - parseInt(log.startTime);
+        if (h < 0) h += 24;
+        totalH += h;
+      }
+    });
+
+    // 서명 이미지
+    const sigCaregiverHtml = sigCaregiver ? `<div style="display:inline-block;min-width:50mm;min-height:15mm;border:1px solid #CCC;padding:1mm;"><img src="${sigCaregiver}" style="max-width:48mm;max-height:13mm;" alt="간병인 서명" /></div>` : '<div style="display:inline-block;min-width:50mm;min-height:15mm;border:1px solid #CCC;padding:1mm;">&nbsp;</div>';
+    const sigGuardianHtml = sigGuardian ? `<div style="display:inline-block;min-width:50mm;min-height:15mm;border:1px solid #CCC;padding:1mm;"><img src="${sigGuardian}" style="max-width:48mm;max-height:13mm;" alt="보호자 서명" /></div>` : '<div style="display:inline-block;min-width:50mm;min-height:15mm;border:1px solid #CCC;padding:1mm;">&nbsp;</div>';
+
+    const now = new Date();
+    const nowStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${docTitle}</title>
+  <style>
+    @page { size: A4; margin: 0mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 210mm; height: 297mm;
+      margin: 0; padding: 0;
+      overflow: hidden;
+      background: white;
+      font-family: 'Noto Serif KR', serif;
+    }
+    .container {
+      margin: 8mm 12mm;
+      border: 2px solid #333;
+      padding: 6mm 8mm;
+      height: calc(297mm - 16mm);
+    }
+    h3 {
+      text-align: center; font-size: 6mm; font-weight: 800;
+      letter-spacing: 0.8mm; margin-bottom: 5mm; color: #111;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    td, th {
+      border: 1px solid #999; padding: 2mm 3mm;
+      font-size: 3.5mm; text-align: center; vertical-align: middle;
+    }
+    th { background: #F0F0F0; font-weight: 600; font-size: 3.2mm; color: #333; }
+    .info-table th { width: 16%; }
+    .signatures { display: flex; justify-content: center; gap: 10mm; margin-top: 5mm; padding-top: 3mm; border-top: 1px solid #999; }
+    .sig-item { text-align: center; font-size: 3.5mm; }
+    .sig-item .label { margin-bottom: 2mm; font-weight: 600; }
+    .bottom-info { margin-top: 3mm; text-align: right; font-size: 3.5mm; }
+    .company { margin-top: 4mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h3>다사랑 간병 일지</h3>
+    <table class="info-table">
+      <tr>
+        <th>환자명</th><td style="width:28%">${patientName || ''}</td>
+        <th>성별</th><td style="width:12%">${genderPrint}</td>
+        <th>생년월일</th><td style="width:28%">${birthPrint}</td>
+      </tr>
+      <tr>
+        <th>간병인 성명</th><td>${caregiverName || ''}</td>
+        <th>간병기간</th><td colspan="3">${fmtPrint(startDate)} ~ ${fmtPrint(endDate)}</td>
+      </tr>
+      <tr>
+        <th>간병인 연락처</th><td>${caregiverPhone || ''}</td>
+        <th>소속업체</th><td colspan="3">다사랑</td>
+      </tr>
+    </table>
+    ${dateList.length > 0 ? `
+    <table style="margin-top:3mm;">
+      <thead>
+        <tr>
+          <th style="width:18%">간병일자</th>
+          <th style="width:26%">간병시간</th>
+          <th style="width:14%">근무시간</th>
+          <th>간병 업무</th>
+        </tr>
+      </thead>
+      <tbody>${dailyRows}</tbody>
+    </table>` : ''}
+    <div class="signatures">
+      <div class="sig-item">
+        <div class="label">간병인 서명</div>
+        ${sigCaregiverHtml}
+      </div>
+      <div class="sig-item">
+        <div class="label">보호자 서명</div>
+        ${sigGuardianHtml}
+      </div>
+    </div>
+    <div class="bottom-info">총 근무시간: ${totalH}시간</div>
+    <div class="bottom-info" style="margin-top:1mm;">작성일시 ${nowStr}</div>
+    <div class="company">제 천 지 역 자 활 센 터<br>다 사 랑 간 병 공 동 체 (인)</div>
+  </div>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   // ── 저장 함수 ──
@@ -370,7 +507,6 @@ export default function CareLogPage() {
                           ⏰
                         </button>
                       </span>
-                      <span className="print-only" style={{ display: 'none' }}>{log.startTime ? `${log.startTime}시` : ''} ~ {log.endTime ? `${log.endTime}시` : ''}</span>
                     </td>
                     <td style={{ ...td2, fontWeight: 600, color: '#4A7C59' }}>{dur}</td>
                     <td style={td2}>
@@ -380,9 +516,6 @@ export default function CareLogPage() {
                             <input type="checkbox" checked={log.tasks.includes(t)} onChange={() => toggleTask(date, t)} />{t}
                           </label>
                         ))}
-                      </span>
-                      <span className="print-only" style={{ display: 'none' }}>
-                        {TASKS.map(t => `${t}${log.tasks.includes(t) ? '☑' : '□'}`).join(' / ')}
                       </span>
                     </td>
                   </tr>
@@ -396,14 +529,6 @@ export default function CareLogPage() {
         <div className="no-print" style={{ display: 'flex', justifyContent: 'center', gap: '3rem', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #E0E8E0', flexWrap: 'wrap' }}>
           <SignaturePad label="간병인 서명" onSave={setSigCaregiver} saved={sigCaregiver} />
           <SignaturePad label="보호자 서명" onSave={setSigGuardian} saved={sigGuardian} />
-        </div>
-
-        {/* Print-only signatures */}
-        <div className="print-only" style={{ display: 'none', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #999' }}>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem' }}>
-            <SignaturePrint label="간병인 서명" dataUrl={sigCaregiver} />
-            <SignaturePrint label="보호자 서명" dataUrl={sigGuardian} />
-          </div>
         </div>
 
         <div style={{ marginTop: '1rem', textAlign: 'right', fontSize: '0.9375rem', fontWeight: 600, color: '#4A7C59' }}>
@@ -465,12 +590,15 @@ export default function CareLogPage() {
 
       <style jsx>{`
         @media print {
+          html, body {
+            background: white !important;
+            background-image: none !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           .no-print { display: none !important; }
-          .print-only { display: inline !important; }
-          body { font-size: 9px; }
-          table { font-size: 7px; }
-          th, td { padding: 0 2px !important; }
-          h3 { font-size: 14px !important; margin-bottom: 0.5rem !important; }
         }
       `}</style>
     </div>

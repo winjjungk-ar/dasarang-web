@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+
+const AUTH_KEY = 'erp_auth_v2';
+const AUTH_TTL = 10 * 60 * 1000; // 10분
 
 export default function ERPLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -10,9 +13,29 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
+  // 10분 세션 체크
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(AUTH_KEY);
+      if (stored) {
+        const { ts } = JSON.parse(stored);
+        if (Date.now() - ts < AUTH_TTL) {
+          setAuthenticated(true);
+          return;
+        }
+      }
+    } catch { /* ignore */ }
+    setAuthenticated(false);
+  }, []);
+
   const handleLogin = () => {
-    if (password === '448282') { setAuthenticated(true); setError(''); }
-    else { setError('비밀번호가 틀렸습니다'); }
+    if (password === '448282') {
+      localStorage.setItem(AUTH_KEY, JSON.stringify({ ts: Date.now() }));
+      setAuthenticated(true);
+      setError('');
+    } else {
+      setError('비밀번호가 틀렸습니다');
+    }
   };
 
   if (!authenticated) {

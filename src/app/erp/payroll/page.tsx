@@ -248,6 +248,14 @@ export default function PayrollPage() {
       )}
 
       <style jsx>{`@media print {
+        html, body {
+          background: white !important;
+          background-image: none !important;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
         .no-print { display: none !important; }
         .payslip { border: 2px solid #333 !important; padding: 10mm !important; }
         body { font-size: 12px; }

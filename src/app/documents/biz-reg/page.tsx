@@ -4,10 +4,30 @@ import { useState } from 'react';
 
 export default function BizRegPage() {
   const handlePrint = () => {
-    const prev = document.title;
-    document.title = '제천다사랑간병사업자등록증';
-    window.print();
-    setTimeout(() => { document.title = prev; }, 500);
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { window.print(); return; }
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>사업자등록증</title>
+  <style>
+    @page { size: A4; margin: 0mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow: hidden; background: white; }
+    img { width: 100%; height: 100%; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <img src="${window.location.origin}/biz-reg.jpg" alt="사업자등록증"
+    onerror="this.style.display='none';document.body.innerHTML='<div style=padding:20mm;text-align:center;color:#999;font-size:5mm>사업자등록증 이미지가 없습니다.<br><br><code>public/biz-reg.jpg</code> 파일을 추가해주세요.</div>'"/>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   return (
@@ -42,6 +62,14 @@ export default function BizRegPage() {
 
       <style jsx>{`
         @media print {
+          html, body {
+            background: white !important;
+            background-image: none !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           .no-print { display: none !important; }
           img { max-height: 270mm; width: auto; object-fit: contain; }
         }

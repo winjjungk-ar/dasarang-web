@@ -84,10 +84,113 @@ export default function TransactionCertPage() {
 
   const handlePrint = () => {
     const today = new Date().toISOString().split('T')[0];
-    const prev = document.title;
-    document.title = `${today}_${patientName || '환자'}_거래명세서`;
-    window.print();
-    setTimeout(() => { document.title = prev; }, 500);
+    const name = patientName || '환자';
+    const docTitle = `${today}_${name}_거래명세서`;
+
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { window.print(); return; }
+
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+
+    // 거래내역 행 생성
+    const rows = filtered.map((t, i) =>
+      `<tr style="background:${i % 2 === 0 ? '#FAFAFA' : 'white'}">` +
+        `<td style="font-size:3.2mm;">${t.date}</td>` +
+        `<td style="text-align:right;font-weight:600;font-size:3.2mm;">${fmt(t.amount)}원</td>` +
+        `<td style="font-size:3.2mm;">${t.note || t.category}</td>` +
+      `</tr>`
+    ).join('');
+
+    // mm 단위 고정 — A4 전용
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${docTitle}</title>
+  <style>
+    @page { size: A4; margin: 0mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 210mm; height: 297mm;
+      margin: 0; padding: 0;
+      overflow: hidden;
+      background: white;
+      font-family: sans-serif;
+    }
+    .cert {
+      margin: 8mm 10mm;
+      border: 2px solid #333;
+      padding: 6mm 8mm;
+      height: calc(297mm - 16mm);
+    }
+    h3 {
+      text-align: center; font-size: 6mm; font-weight: 800;
+      letter-spacing: 3mm; margin-bottom: 5mm; color: #111;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    td, th {
+      border: 1px solid #555; padding: 2mm 3mm;
+      font-size: 3.2mm; text-align: center; vertical-align: middle;
+    }
+    th { background: #F0F0F0; font-weight: 700; font-size: 3mm; color: #333; }
+    .info-th { width: 14%; }
+    .footer { text-align: center; margin-top: 8mm; font-size: 3.8mm; font-weight: bold; letter-spacing: 1mm; line-height: 2.2; }
+  </style>
+</head>
+<body>
+  <div class="cert">
+    <h3>거 래 명 세 서</h3>
+
+    <table>
+      <tr>
+        <th class="info-th">환자명</th><td style="width:20%">${patientName || '　'}</td>
+        <th class="info-th">보호자명</th><td style="width:20%">${guardianName || '　'}</td>
+        <th class="info-th">병원명</th><td style="width:18%">${hospital || '　'}</td>
+      </tr>
+      <tr>
+        <th class="info-th">간병인</th><td>${caregiverName || '　'}</td>
+        <th class="info-th">기간</th><td colspan="3">${fmtDate(startDate)} ~ ${fmtDate(endDate)}</td>
+      </tr>
+      <tr>
+        <th class="info-th">소속업체</th><td>다사랑 간병</td>
+        <th class="info-th">사업자번호</th><td colspan="3">141-94-02083</td>
+      </tr>
+    </table>
+
+    <table style="margin-top:4mm;">
+      <thead>
+        <tr>
+          <th>거래일자</th><th>금액</th><th>내용</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.length === 0
+          ? `<tr><td colspan="3" style="color:#999;padding:5mm;">${searchNote ? '검색 결과가 없습니다' : '기간을 선택하고 보호자명 등으로 검색해주세요'}</td></tr>`
+          : rows}
+      </tbody>
+      ${filtered.length > 0 ? `
+      <tfoot>
+        <tr style="background:#E8F5E9;font-weight:700;">
+          <th>합계</th>
+          <td style="text-align:right;font-weight:700;font-size:3.5mm;">${fmt(total)}원</td>
+          <td style="font-weight:700;font-size:3.5mm;">${filtered.length}건</td>
+        </tr>
+      </tfoot>` : ''}
+    </table>
+
+    <div class="footer">
+      상기와 같이 거래하였음을 확인합니다.<br>
+      ${todayStr}<br>
+      다 사 랑 간 병 공 동 체 (인)
+    </div>
+  </div>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '4rem', color: '#999' }}>⏳ 로딩 중...</div>;
@@ -196,7 +299,16 @@ export default function TransactionCertPage() {
         <button onClick={handlePrint} style={btn}>🖨️ 인쇄 / PDF 저장</button>
       </div>
 
-      <style jsx>{`@media print { .no-print { display: none !important; } body { font-size: 10px; } }`}</style>
+      <style jsx>{`@media print {
+        html, body {
+          background: white !important;
+          background-image: none !important;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .no-print { display: none !important; } body { font-size: 10px; } }`}</style>
     </div>
   );
 }

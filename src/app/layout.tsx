@@ -19,14 +19,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <head>
-        <style>{`@media print { header, footer, nav, .no-print { display: none !important; } body { background: white !important; } }`}</style>
+        <style>{`@media print {
+          header, footer, nav, .no-print { display: none !important; }
+          html, body { background: white !important; background-image: none !important; }
+          @page { size: A4 portrait; margin: 5mm; }
+        }`}</style>
       </head>
       <body style={{
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: 'linear-gradient(180deg, #FEFBF6 0%, #FFF9EE 30%, #F5F0E8 100%)',
-        backgroundAttachment: 'fixed',
       }}>
         <header className="no-print" style={{
           position: 'fixed',

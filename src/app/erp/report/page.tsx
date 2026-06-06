@@ -287,6 +287,14 @@ export default function ReportPage() {
 
       <style jsx>{`
         @media print {
+          html, body {
+            background: white !important;
+            background-image: none !important;
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
           .no-print { display: none !important; }
           body { font-size: 10px; }
         }

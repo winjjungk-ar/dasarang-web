@@ -212,7 +212,16 @@ export default function InsurancePage() {
         )}
       </div>
 
-      <style jsx>{`@media print { .no-print { display: none !important; } }`}</style>
+      <style jsx>{`@media print {
+        html, body {
+          background: white !important;
+          background-image: none !important;
+        }
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        .no-print { display: none !important; } }`}</style>
     </div>
   );
 }

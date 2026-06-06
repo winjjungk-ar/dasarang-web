@@ -101,13 +101,9 @@ export default function EmploymentCertPage() {
 </body>
 </html>`);
     printWindow.document.close();
-
-    printWindow.onload = () => {
-      setTimeout(() => {
-        printWindow.print();
-        setTimeout(() => printWindow.close(), 500);
-      }, 300);
-    };
+    // onload 대신 동기 호출 — 모바일 Chrome에서 onload 불발 방지
+    printWindow.print();
+    setTimeout(() => { try { printWindow.close(); } catch {} }, 800);
   };
 
   const formatDate = (dateStr: string) => {

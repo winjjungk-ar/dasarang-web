@@ -38,15 +38,15 @@ export default function EmploymentCertPage() {
   <style>
     @page { margin: 0 !important; size: A4 portrait; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { font-size: 11px; height: auto; overflow: hidden; }
+    html, body { font-size: 11px; height: auto; max-height: 297mm; overflow: hidden; }
     body { padding: 6mm 5mm; page-break-after: avoid; page-break-inside: avoid; }
     .cert { border: 3px solid #333; padding: 1.8rem 1.5rem; page-break-inside: avoid; }
     h3 { text-align: center; font-size: 20px; font-weight: 800; letter-spacing: 0.3rem; margin-bottom: 2rem; color: #111; }
     table { width: 100%; border-collapse: collapse; }
     td, th { border: 1px solid #555; padding: 5px 6px; font-size: 11px; text-align: center; vertical-align: middle; }
     th { background: #F5F5F5; font-weight: 700; font-size: 10px; color: #333; width: 18%; }
-    .proof { text-align: center; margin: 19rem 0 20rem 0; font-size: 12px; font-weight: 500; line-height: 1.8; }
-    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 5rem; padding-top: 1.5rem; }
+    .proof { text-align: center; margin: 10rem 0 11rem 0; font-size: 12px; font-weight: 500; line-height: 1.8; }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 3rem; padding-top: 1.5rem; }
     .issuer { text-align: center; flex: 2; }
     .issuer .name { font-weight: 800; font-size: 1.1rem; letter-spacing: 0.15rem; }
     .issuer .sub { font-size: 0.9rem; margin-top: 0.2rem; }

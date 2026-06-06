@@ -262,6 +262,7 @@ export default function ConfirmationPage() {
       printWindow.print();
     }, 200);
     printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+  };
 
   // ── 저장 함수 ──
   const loadSavedList = async () => {

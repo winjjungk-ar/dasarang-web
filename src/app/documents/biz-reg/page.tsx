@@ -31,6 +31,7 @@ export default function BizRegPage() {
       printWindow.print();
     }, 200);
     printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
+  };
 
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '1rem' }}>

@@ -193,7 +193,7 @@ export default function TransactionCertPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '4rem', color: '#999' }}>⏳ 로딩 중...</div>;
 

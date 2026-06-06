@@ -261,7 +261,7 @@ export default function ConfirmationPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
 
   // ── 저장 함수 ──
   const loadSavedList = async () => {

@@ -235,7 +235,7 @@ export default function CareLogPage() {
     setTimeout(() => {
       printWindow.print();
     }, 200);
-    printWindow.onafterprint
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
 
   // ── 저장 함수 ──
   const handleSaveCareLog = async () => {

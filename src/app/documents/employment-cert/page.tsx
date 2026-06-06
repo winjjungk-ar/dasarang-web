@@ -23,16 +23,76 @@ export default function EmploymentCertPage() {
 
   const handlePrint = () => {
     const today = new Date().toISOString().split('T')[0];
-    const prevTitle = document.title;
     const name = caregiverName || '재직증명서';
-    document.title = `${today}_${name}_재직증명서`;
-    // RAF로 DOM 반영 확정 후 인쇄
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        window.print();
-        setTimeout(() => { document.title = prevTitle; }, 500);
-      });
-    });
+    const docTitle = `${today}_${name}_재직증명서`;
+
+    // 새 창에 깔끗한 HTML만 띄워서 인쇄 (Android @page margin 무시 우회)
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { window.print(); return; }
+
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${docTitle}</title>
+  <style>
+    @page { margin: 0 !important; size: A4 portrait; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 11px; }
+    body { padding: 6mm 5mm; }
+    .cert { border: 3px solid #333; padding: 1.8rem 1.5rem; }
+    h3 { text-align: center; font-size: 20px; font-weight: 800; letter-spacing: 0.3rem; margin-bottom: 2rem; color: #111; }
+    table { width: 100%; border-collapse: collapse; }
+    td, th { border: 1px solid #555; padding: 5px 6px; font-size: 11px; text-align: center; vertical-align: middle; }
+    th { background: #F5F5F5; font-weight: 700; font-size: 10px; color: #333; width: 18%; }
+    .proof { text-align: center; margin: 19rem 0 20rem 0; font-size: 12px; font-weight: 500; line-height: 1.8; }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 5rem; padding-top: 1.5rem; }
+    .issuer { text-align: center; flex: 2; }
+    .issuer .name { font-weight: 800; font-size: 1.1rem; letter-spacing: 0.15rem; }
+    .issuer .sub { font-size: 0.9rem; margin-top: 0.2rem; }
+    .issuer .reg { font-size: 0.75rem; color: #888; margin-top: 0.3rem; }
+    .date-col { text-align: center; flex: 1; }
+    .date-col .label { font-size: 0.85rem; color: #555; }
+    .date-col .val { font-weight: 600; font-size: 0.95rem; margin-top: 0.3rem; }
+  </style>
+</head>
+<body>
+  <div class="cert">
+    <h3>재 직 증 명 서</h3>
+    <table>
+      <tr>
+        <th>성　명</th><td style="width:32%">${caregiverName || '　'}</td>
+        <th>주민등록번호</th><td style="width:32%">${caregiverRegNum || '　'}</td>
+      </tr>
+      <tr>
+        <th>소　속</th><td>다사랑 간병공동체</td>
+        <th>직　위</th><td>${position || '간병인'}</td>
+      </tr>
+      <tr>
+        <th>입 사 일</th><td>${formatDate(joinDate)}</td>
+        <th>근속기간</th><td>${periodText || '　'}</td>
+      </tr>
+      <tr>
+        <th>발급목적</th><td colspan="3">${purpose || '　'}</td>
+      </tr>
+    </table>
+    <p class="proof">위 사람은 당사에 재직 중인 간병인임을 증명합니다.</p>
+    <div class="footer">
+      <div class="date-col"><p class="label">발급일</p><p class="val">${formatDate(issueDate)}</p></div>
+      <div class="issuer"><p class="name">다사랑 간병공동체</p><p class="sub">대표 이순이 (인)</p><p class="reg">사업자등록번호 141-94-02083</p></div>
+    </div>
+  </div>
+</body>
+</html>`);
+    printWindow.document.close();
+
+    // 이미지/폰트 로드 후 인쇄
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print();
+        setTimeout(() => printWindow.close(), 500);
+      }, 300);
+    };
   };
 
   const formatDate = (dateStr: string) => {
@@ -151,39 +211,78 @@ export default function EmploymentCertPage() {
 
       <div className="no-print" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
         <button onClick={handlePrint} style={{ padding: '0.75rem 2rem', background: '#4A7C59', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>🖨️ 인쇄 / PDF 저장</button>
+        <p style={{ fontSize: '0.75rem', color: '#888', marginTop: '0.5rem' }}>
+          📱 모바일: [인쇄 / PDF 저장] 클릭 → 새 창에서 자동 인쇄 다이얼로그 열림 → PDF 저장
+        </p>
       </div>
 
       <style jsx>{`@media print {
-        @page { margin: 0; size: A4 portrait; }
+        @page { margin: 0 !important; size: A4 portrait; }
         html, body {
           height: auto !important; min-height: 0 !important;
-          overflow: hidden !important;
+          overflow: visible !important;
           margin: 0 !important; padding: 0 !important;
+          background: white !important;
+          background-image: none !important;
+          font-size: 11px !important;
+          width: 100% !important;
         }
-        /* 바깥의 모든 div/컨테이너 여백 제거 */
-        body > div, body > div > div {
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        /* 컨테이너 초기화 */
+        body > div, body > div > div, body > div > div > div {
           margin: 0 !important; padding: 0 !important;
           max-width: none !important;
-        }
-        *, *::before, *::after {
-          page-break-before: avoid !important;
-          page-break-after: avoid !important;
-          page-break-inside: avoid !important;
+          width: 100% !important;
+          background: white !important;
         }
         .no-print { display: none !important; }
         .doc-print-area {
-          border: 3px solid #333 !important;
-          padding: 5mm 5mm !important;
+          border: 2px solid #333 !important;
+          padding: 6mm 5mm !important;
           margin: 0 auto !important;
           border-radius: 0 !important;
-          max-width: 198mm;
+          width: 100% !important;
+          max-width: none !important;
+          background: white !important;
+          min-height: 0 !important;
+          box-sizing: border-box !important;
         }
-        body { font-size: 12px; }
-        table { font-size: 11px; }
-        td { padding: 8px 8px !important; font-size: 11px !important; }
-        td[style*="background: #F5F5F5"] { font-size: 10px !important; }
-        h3 { font-size: 20px !important; margin-bottom: 4mm !important; }
-        p { line-height: 1.6 !important; }
+        /* 제목 */
+        h3 {
+          font-size: 20px !important;
+          margin: 0 0 5mm 0 !important;
+          letter-spacing: 0.3rem !important;
+          text-align: center !important;
+        }
+        /* 증명문구 */
+        .doc-print-area > p {
+          margin: 20mm 0 !important;
+          font-size: 12px !important;
+          line-height: 1.5 !important;
+          text-align: center !important;
+        }
+        /* 하단 발급일+발급자 */
+        .doc-print-area > div:last-of-type {
+          margin-top: 10mm !important;
+          padding-top: 3mm !important;
+        }
+        /* 테이블 */
+        table {
+          font-size: 11px !important;
+          width: 100% !important;
+          border-collapse: collapse !important;
+        }
+        td, th {
+          padding: 5px 6px !important;
+          font-size: 11px !important;
+          line-height: 1.3 !important;
+        }
+        /* 페이지 분할 */
+        * { page-break-inside: auto !important; }
+        .doc-print-area { page-break-inside: avoid !important; }
       }`}</style>
     </div>
   );

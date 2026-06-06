@@ -101,9 +101,11 @@ export default function EmploymentCertPage() {
 </body>
 </html>`);
     printWindow.document.close();
-    // onload 대신 동기 호출 — 모바일 Chrome에서 onload 불발 방지
+    // 모바일: print()가 논블로킹이라 자동 닫기 하면 인쇄 전에 창이 닫힘
+    printWindow.focus();
     printWindow.print();
-    setTimeout(() => { try { printWindow.close(); } catch {} }, 800);
+    // afterprint 이벤트로 인쇄 완료 후 닫기
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   const formatDate = (dateStr: string) => {

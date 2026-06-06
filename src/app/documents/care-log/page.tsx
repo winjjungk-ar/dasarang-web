@@ -91,13 +91,23 @@ export default function CareLogPage() {
   const [dailyLogs, setDailyLogs] = useState<Record<string, { startTime: string; endTime: string; tasks: string[] }>>({});
 
   const handlePrint = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const docTitle = `${today}_${patientName || '환자'}_간병일지`;
+    // 기존 인쇄용 div 제거
+    const oldDiv = document.getElementById('print-container');
+    if (oldDiv) oldDiv.remove();
+    const oldStyle = document.getElementById('print-style');
+    if (oldStyle) oldStyle.remove();
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // 인쇄용 CSS: 모든 요소 숨기고 print-container만 표시
+    const style = document.createElement('style');
+    style.id = 'print-style';
+    style.textContent = `@media print {
+      @page { size: A4; margin: 0mm; }
+      body > *:not(#print-container) { display: none !important; }
+      #print-container { display: block !important; position: absolute; top: 0; left: 0; width: 210mm; }
+    }`;
+    document.head.appendChild(style);
 
-    // 날짜 포맷 헬퍼 (인쇄용 HTML 내에서 사용)
+    // 날짜 포맷 헬퍼
     const fmtPrint = (d: string) => {
       if (!d) return '';
       const dt = new Date(d + 'T00:00:00');
@@ -144,21 +154,13 @@ export default function CareLogPage() {
     const now = new Date();
     const nowStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
 
-    printWindow.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${docTitle}</title>
-  <style>
+    // 인쇄용 콘텐츠 div
+    const div = document.createElement('div');
+    div.id = 'print-container';
+    div.style.cssText = 'display:none;position:absolute;top:0;left:0;width:210mm;background:white;font-family:\'Noto Serif KR\',serif;';
+    div.innerHTML = `<style>
+    * { margin:0;padding:0;box-sizing:border-box; }
     @page { size: A4; margin: 0mm; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 210mm; height: 297mm;
-      margin: 0; padding: 0;
-      overflow: hidden;
-      background: white;
-      font-family: 'Noto Serif KR', serif;
-    }
     .container {
       margin: 8mm 12mm;
       border: 2px solid #333;
@@ -181,61 +183,60 @@ export default function CareLogPage() {
     .sig-item .label { margin-bottom: 2mm; font-weight: 600; }
     .bottom-info { margin-top: 3mm; text-align: right; font-size: 3.5mm; }
     .company { margin-top: 4mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h3>다사랑 간병 일지</h3>
-    <table class="info-table">
-      <tr>
-        <th>환자명</th><td style="width:28%">${patientName || ''}</td>
-        <th>성별</th><td style="width:12%">${genderPrint}</td>
-        <th>생년월일</th><td style="width:28%">${birthPrint}</td>
-      </tr>
-      <tr>
-        <th>간병인 성명</th><td>${caregiverName || ''}</td>
-        <th>간병기간</th><td colspan="3">${fmtPrint(startDate)} ~ ${fmtPrint(endDate)}</td>
-      </tr>
-      <tr>
-        <th>간병인 연락처</th><td>${caregiverPhone || ''}</td>
-        <th>소속업체</th><td colspan="3">다사랑</td>
-      </tr>
-    </table>
-    ${dateList.length > 0 ? `
-    <table style="margin-top:3mm;">
-      <thead>
+    </style>
+    <div class="container">
+      <h3>다사랑 간병 일지</h3>
+      <table class="info-table">
         <tr>
-          <th style="width:18%">간병일자</th>
-          <th style="width:26%">간병시간</th>
-          <th style="width:14%">근무시간</th>
-          <th>간병 업무</th>
+          <th>환자명</th><td style="width:28%">${patientName || ''}</td>
+          <th>성별</th><td style="width:12%">${genderPrint}</td>
+          <th>생년월일</th><td style="width:28%">${birthPrint}</td>
         </tr>
-      </thead>
-      <tbody>${dailyRows}</tbody>
-    </table>` : ''}
-    <div class="signatures">
-      <div class="sig-item">
-        <div class="label">간병인 서명</div>
-        ${sigCaregiverHtml}
+        <tr>
+          <th>간병인 성명</th><td>${caregiverName || ''}</td>
+          <th>간병기간</th><td colspan="3">${fmtPrint(startDate)} ~ ${fmtPrint(endDate)}</td>
+        </tr>
+        <tr>
+          <th>간병인 연락처</th><td>${caregiverPhone || ''}</td>
+          <th>소속업체</th><td colspan="3">다사랑</td>
+        </tr>
+      </table>
+      ${dateList.length > 0 ? `
+      <table style="margin-top:3mm;">
+        <thead>
+          <tr>
+            <th style="width:18%">간병일자</th>
+            <th style="width:26%">간병시간</th>
+            <th style="width:14%">근무시간</th>
+            <th>간병 업무</th>
+          </tr>
+        </thead>
+        <tbody>${dailyRows}</tbody>
+      </table>` : ''}
+      <div class="signatures">
+        <div class="sig-item">
+          <div class="label">간병인 서명</div>
+          ${sigCaregiverHtml}
+        </div>
+        <div class="sig-item">
+          <div class="label">보호자 서명</div>
+          ${sigGuardianHtml}
+        </div>
       </div>
-      <div class="sig-item">
-        <div class="label">보호자 서명</div>
-        ${sigGuardianHtml}
-      </div>
-    </div>
-    <div class="bottom-info">총 근무시간: ${totalH}시간</div>
-    <div class="bottom-info" style="margin-top:1mm;">작성일시 ${nowStr}</div>
-    <div class="company">제 천 지 역 자 활 센 터<br>다 사 랑 간 병 공 동 체 (인)</div>
-  </div>
-</body>
-</html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
+      <div class="bottom-info">총 근무시간: ${totalH}시간</div>
+      <div class="bottom-info" style="margin-top:1mm;">작성일시 ${nowStr}</div>
+      <div class="company">제 천 지 역 자 활 센 터<br>다 사 랑 간 병 공 동 체 (인)</div>
+    </div>`;
+    document.body.appendChild(div);
+
+    // 렌더링 후 인쇄
     setTimeout(() => {
-      printWindow.print();
+      window.print();
+      setTimeout(() => {
+        div.remove();
+        style.remove();
+      }, 1000);
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   // ── 저장 함수 ──

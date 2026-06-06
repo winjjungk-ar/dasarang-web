@@ -26,88 +26,68 @@ export default function EmploymentCertPage() {
     const name = caregiverName || '재직증명서';
     const docTitle = `${today}_${name}_재직증명서`;
 
-    const printWindow = window.open('', '_blank', 'width=800,height=600');
-    if (!printWindow) { window.print(); return; }
+    // 기존 인쇄용 div 제거
+    const oldDiv = document.getElementById('print-container');
+    if (oldDiv) oldDiv.remove();
+    const oldStyle = document.getElementById('print-style');
+    if (oldStyle) oldStyle.remove();
 
-    // mm 단위 고정 — rem 의존 제거 (Android rem 기준 불확실)
-    printWindow.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>${docTitle}</title>
-  <style>
-    @page { size: A4; margin: 0mm; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 210mm; height: 297mm;
-      margin: 0; padding: 0;
-      overflow: hidden;
-      background: white;
-      font-family: sans-serif;
-    }
-    .cert {
-      margin: 10mm 12mm;
-      border: 2px solid #333;
-      padding: 8mm 10mm;
-      height: calc(297mm - 20mm);
-    }
-    h3 {
-      text-align: center; font-size: 7mm; font-weight: 800;
-      letter-spacing: 1.5mm; margin-bottom: 8mm; color: #111;
-    }
-    table { width: 100%; border-collapse: collapse; }
-    td, th {
-      border: 1px solid #555; padding: 3mm 4mm;
-      font-size: 3.8mm; text-align: center; vertical-align: middle;
-    }
-    th { background: #F5F5F5; font-weight: 700; font-size: 3.5mm; color: #333; width: 18%; }
-    .proof { text-align: center; margin: 35mm 0 38mm 0; font-size: 4mm; font-weight: 500; }
-    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10mm; padding-top: 5mm; }
-    .issuer { text-align: center; flex: 2; }
-    .issuer .name { font-weight: 800; font-size: 4.5mm; letter-spacing: 0.5mm; }
-    .issuer .sub { font-size: 3.8mm; margin-top: 1mm; }
-    .issuer .reg { font-size: 3mm; color: #888; margin-top: 1mm; }
-    .date-col { text-align: center; flex: 1; }
-    .date-col .label { font-size: 3.5mm; color: #555; }
-    .date-col .val { font-weight: 600; font-size: 4mm; margin-top: 1mm; }
-  </style>
-</head>
-<body>
-  <div class="cert">
-    <h3>재 직 증 명 서</h3>
-    <table>
-      <tr>
-        <th>성　명</th><td style="width:32%">${caregiverName || '　'}</td>
-        <th>주민등록번호</th><td style="width:32%">${caregiverRegNum || '　'}</td>
-      </tr>
-      <tr>
-        <th>소　속</th><td>다사랑 간병공동체</td>
-        <th>직　위</th><td>${position || '간병인'}</td>
-      </tr>
-      <tr>
-        <th>입 사 일</th><td>${formatDate(joinDate)}</td>
-        <th>근속기간</th><td>${periodText || '　'}</td>
-      </tr>
-      <tr>
-        <th>발급목적</th><td colspan="3">${purpose || '　'}</td>
-      </tr>
-    </table>
-    <p class="proof">위 사람은 당사에 재직 중인 간병인임을 증명합니다.</p>
-    <div class="footer">
-      <div class="date-col"><p class="label">발급일</p><p class="val">${formatDate(issueDate)}</p></div>
-      <div class="issuer"><p class="name">다사랑 간병공동체</p><p class="sub">대표 이순이 (인)</p><p class="reg">사업자등록번호 141-94-02083</p></div>
-    </div>
-  </div>
-</body>
-</html>`);
-    printWindow.document.close();
-    // 모바일: print()가 논블로킹이라 자동 닫기 하면 인쇄 전에 창이 닫힘
-    printWindow.focus();
-    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
+    // 인쇄용 CSS: 모든 요소 숨기고 print-container만 표시
+    const style = document.createElement('style');
+    style.id = 'print-style';
+    style.textContent = `@media print {
+      @page { size: A4; margin: 0mm; }
+      body > *:not(#print-container) { display: none !important; }
+      #print-container { display: block !important; position: absolute; top: 0; left: 0; width: 210mm; }
+    }`;
+    document.head.appendChild(style);
+
+    // 인쇄용 콘텐츠 div
+    const div = document.createElement('div');
+    div.id = 'print-container';
+    div.style.cssText = 'display:none;position:absolute;top:0;left:0;width:210mm;background:white;font-family:sans-serif;';
+    div.innerHTML = `<style>
+    * { margin:0;padding:0;box-sizing:border-box; }
+    body { width:210mm;height:297mm;margin:0;padding:0;overflow:hidden;background:white; }
+    .cert { margin:10mm 12mm;border:2px solid #333;padding:8mm 10mm;height:calc(297mm - 20mm); }
+    h3 { text-align:center;font-size:7mm;font-weight:800;letter-spacing:1.5mm;margin-bottom:8mm;color:#111; }
+    table { width:100%;border-collapse:collapse; }
+    td, th { border:1px solid #555;padding:3mm 4mm;font-size:3.8mm;text-align:center;vertical-align:middle; }
+    th { background:#F5F5F5;font-weight:700;font-size:3.5mm;color:#333;width:18%; }
+    .proof { text-align:center;margin:35mm 0 38mm 0;font-size:4mm;font-weight:500; }
+    .footer { display:flex;justify-content:space-between;align-items:flex-end;margin-top:10mm;padding-top:5mm; }
+    .issuer { text-align:center;flex:2; }
+    .issuer .name { font-weight:800;font-size:4.5mm;letter-spacing:0.5mm; }
+    .issuer .sub { font-size:3.8mm;margin-top:1mm; }
+    .issuer .reg { font-size:3mm;color:#888;margin-top:1mm; }
+    .date-col { text-align:center;flex:1; }
+    .date-col .label { font-size:3.5mm;color:#555; }
+    .date-col .val { font-weight:600;font-size:4mm;margin-top:1mm; }
+    </style>
+    <div class="cert">
+      <h3>재 직 증 명 서</h3>
+      <table>
+        <tr><th>성　명</th><td style="width:32%">${caregiverName || '　'}</td><th>주민등록번호</th><td style="width:32%">${caregiverRegNum || '　'}</td></tr>
+        <tr><th>소　속</th><td>다사랑 간병공동체</td><th>직　위</th><td>${position || '간병인'}</td></tr>
+        <tr><th>입 사 일</th><td>${formatDate(joinDate)}</td><th>근속기간</th><td>${periodText || '　'}</td></tr>
+        <tr><th>발급목적</th><td colspan="3">${purpose || '　'}</td></tr>
+      </table>
+      <p class="proof">위 사람은 당사에 재직 중인 간병인임을 증명합니다.</p>
+      <div class="footer">
+        <div class="date-col"><p class="label">발급일</p><p class="val">${formatDate(issueDate)}</p></div>
+        <div class="issuer"><p class="name">다사랑 간병공동체</p><p class="sub">대표 이순이 (인)</p><p class="reg">사업자등록번호 141-94-02083</p></div>
+      </div>
+    </div>`;
+    document.body.appendChild(div);
+
+    // 렌더링 후 인쇄
     setTimeout(() => {
-      printWindow.print();
+      window.print();
+      setTimeout(() => {
+        div.remove();
+        style.remove();
+      }, 1000);
     }, 200);
-    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   const formatDate = (dateStr: string) => {

@@ -38,9 +38,9 @@ export default function EmploymentCertPage() {
   <style>
     @page { margin: 0 !important; size: A4 portrait; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { font-size: 11px; }
-    body { padding: 6mm 5mm; }
-    .cert { border: 3px solid #333; padding: 1.8rem 1.5rem; }
+    html, body { font-size: 11px; height: auto; overflow: hidden; }
+    body { padding: 6mm 5mm; page-break-after: avoid; page-break-inside: avoid; }
+    .cert { border: 3px solid #333; padding: 1.8rem 1.5rem; page-break-inside: avoid; }
     h3 { text-align: center; font-size: 20px; font-weight: 800; letter-spacing: 0.3rem; margin-bottom: 2rem; color: #111; }
     table { width: 100%; border-collapse: collapse; }
     td, th { border: 1px solid #555; padding: 5px 6px; font-size: 11px; text-align: center; vertical-align: middle; }

@@ -87,21 +87,8 @@ export default function TransactionCertPage() {
     const name = patientName || '환자';
     const docTitle = `${today}_${name}_거래명세서`;
 
-    // 기존 인쇄용 div 제거
-    const oldDiv = document.getElementById('print-container');
-    if (oldDiv) oldDiv.remove();
-    const oldStyle = document.getElementById('print-style');
-    if (oldStyle) oldStyle.remove();
-
-    // 인쇄용 CSS: 모든 요소 숨기고 print-container만 표시
-    const style = document.createElement('style');
-    style.id = 'print-style';
-    style.textContent = `@media print {
-      @page { size: A4; margin: 0mm; }
-      body > *:not(#print-container) { display: none !important; }
-      #print-container { display: block !important; position: absolute; top: 0; left: 0; width: 210mm; }
-    }`;
-    document.head.appendChild(style);
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { window.print(); return; }
 
     const now = new Date();
     const todayStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
@@ -115,11 +102,13 @@ export default function TransactionCertPage() {
       `</tr>`
     ).join('');
 
-    // 인쇄용 콘텐츠 div
-    const div = document.createElement('div');
-    div.id = 'print-container';
-    div.style.cssText = 'display:none;position:absolute;top:0;left:0;width:210mm;background:white;font-family:sans-serif;';
-    div.innerHTML = `<style>
+    // mm 단위 고정 — A4 전용
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${docTitle}</title>
+  <style>
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
@@ -147,63 +136,64 @@ export default function TransactionCertPage() {
     th { background: #F0F0F0; font-weight: 700; font-size: 3mm; color: #333; }
     .info-th { width: 14%; }
     .footer { text-align: center; margin-top: 8mm; font-size: 3.8mm; font-weight: bold; letter-spacing: 1mm; line-height: 2.2; }
-    </style>
-    <div class="cert">
-      <h3>거 래 명 세 서</h3>
+  </style>
+</head>
+<body>
+  <div class="cert">
+    <h3>거 래 명 세 서</h3>
 
-      <table>
+    <table>
+      <tr>
+        <th class="info-th">환자명</th><td style="width:20%">${patientName || '　'}</td>
+        <th class="info-th">보호자명</th><td style="width:20%">${guardianName || '　'}</td>
+        <th class="info-th">병원명</th><td style="width:18%">${hospital || '　'}</td>
+      </tr>
+      <tr>
+        <th class="info-th">간병인</th><td>${caregiverName || '　'}</td>
+        <th class="info-th">기간</th><td colspan="3">${fmtDate(startDate)} ~ ${fmtDate(endDate)}</td>
+      </tr>
+      <tr>
+        <th class="info-th">소속업체</th><td>다사랑 간병</td>
+        <th class="info-th">사업자번호</th><td colspan="3">141-94-02083</td>
+      </tr>
+    </table>
+
+    <table style="margin-top:4mm;">
+      <thead>
         <tr>
-          <th class="info-th">환자명</th><td style="width:20%">${patientName || '　'}</td>
-          <th class="info-th">보호자명</th><td style="width:20%">${guardianName || '　'}</td>
-          <th class="info-th">병원명</th><td style="width:18%">${hospital || '　'}</td>
+          <th>거래일자</th><th>금액</th><th>내용</th>
         </tr>
-        <tr>
-          <th class="info-th">간병인</th><td>${caregiverName || '　'}</td>
-          <th class="info-th">기간</th><td colspan="3">${fmtDate(startDate)} ~ ${fmtDate(endDate)}</td>
+      </thead>
+      <tbody>
+        ${filtered.length === 0
+          ? `<tr><td colspan="3" style="color:#999;padding:5mm;">${searchNote ? '검색 결과가 없습니다' : '기간을 선택하고 보호자명 등으로 검색해주세요'}</td></tr>`
+          : rows}
+      </tbody>
+      ${filtered.length > 0 ? `
+      <tfoot>
+        <tr style="background:#E8F5E9;font-weight:700;">
+          <th>합계</th>
+          <td style="text-align:right;font-weight:700;font-size:3.5mm;">${fmt(total)}원</td>
+          <td style="font-weight:700;font-size:3.5mm;">${filtered.length}건</td>
         </tr>
-        <tr>
-          <th class="info-th">소속업체</th><td>다사랑 간병</td>
-          <th class="info-th">사업자번호</th><td colspan="3">141-94-02083</td>
-        </tr>
-      </table>
+      </tfoot>` : ''}
+    </table>
 
-      <table style="margin-top:4mm;">
-        <thead>
-          <tr>
-            <th>거래일자</th><th>금액</th><th>내용</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filtered.length === 0
-            ? `<tr><td colspan="3" style="color:#999;padding:5mm;">${searchNote ? '검색 결과가 없습니다' : '기간을 선택하고 보호자명 등으로 검색해주세요'}</td></tr>`
-            : rows}
-        </tbody>
-        ${filtered.length > 0 ? `
-        <tfoot>
-          <tr style="background:#E8F5E9;font-weight:700;">
-            <th>합계</th>
-            <td style="text-align:right;font-weight:700;font-size:3.5mm;">${fmt(total)}원</td>
-            <td style="font-weight:700;font-size:3.5mm;">${filtered.length}건</td>
-          </tr>
-        </tfoot>` : ''}
-      </table>
-
-      <div class="footer">
-        상기와 같이 거래하였음을 확인합니다.<br>
-        ${todayStr}<br>
-        다 사 랑 간 병 공 동 체 (인)
-      </div>
-    </div>`;
-    document.body.appendChild(div);
-
-    // 렌더링 후 인쇄
+    <div class="footer">
+      상기와 같이 거래하였음을 확인합니다.<br>
+      ${todayStr}<br>
+      다 사 랑 간 병 공 동 체 (인)
+    </div>
+  </div>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
     setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        div.remove();
-        style.remove();
-      }, 1000);
+      printWindow.print();
     }, 200);
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '4rem', color: '#999' }}>⏳ 로딩 중...</div>;

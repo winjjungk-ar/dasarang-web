@@ -4,43 +4,33 @@ import { useState } from 'react';
 
 export default function BizRegPage() {
   const handlePrint = () => {
-    // 기존 인쇄용 div 제거
-    const oldDiv = document.getElementById('print-container');
-    if (oldDiv) oldDiv.remove();
-    const oldStyle = document.getElementById('print-style');
-    if (oldStyle) oldStyle.remove();
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    if (!printWindow) { window.print(); return; }
 
-    // 인쇄용 CSS: 모든 요소 숨기고 print-container만 표시
-    const style = document.createElement('style');
-    style.id = 'print-style';
-    style.textContent = `@media print {
-      @page { size: A4; margin: 0mm; }
-      body > *:not(#print-container) { display: none !important; }
-      #print-container { display: block !important; position: absolute; top: 0; left: 0; width: 210mm; }
-    }`;
-    document.head.appendChild(style);
-
-    // 인쇄용 콘텐츠 div
-    const div = document.createElement('div');
-    div.id = 'print-container';
-    div.style.cssText = 'display:none;position:absolute;top:0;left:0;width:210mm;background:white;font-family:sans-serif;';
-    div.innerHTML = `<style>
-    * { margin:0;padding:0;box-sizing:border-box; }
-    html, body { width:210mm;height:297mm;margin:0;padding:0;overflow:hidden;background:white; }
-    img { width:210mm;height:297mm;object-fit:contain; }
-    </style>
-    <img src="${window.location.origin}/biz-reg.jpg" alt="사업자등록증"
-      onerror="this.style.display='none';this.parentElement.innerHTML='<div style=padding:20mm;text-align:center;color:#999;font-size:5mm>사업자등록증 이미지가 없습니다.<br><br><code>public/biz-reg.jpg</code> 파일을 추가해주세요.</div>'"/>`;
-    document.body.appendChild(div);
-
-    // 렌더링 후 인쇄
+    printWindow.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>사업자등록증</title>
+  <style>
+    @page { size: A4; margin: 0mm; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow: hidden; background: white; }
+    img { width: 100%; height: 100%; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <img src="${window.location.origin}/biz-reg.jpg" alt="사업자등록증"
+    onerror="this.style.display='none';document.body.innerHTML='<div style=padding:20mm;text-align:center;color:#999;font-size:5mm>사업자등록증 이미지가 없습니다.<br><br><code>public/biz-reg.jpg</code> 파일을 추가해주세요.</div>'"/>
+</body>
+</html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
     setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        div.remove();
-        style.remove();
-      }, 1000);
+      printWindow.print();
     }, 200);
+    printWindow.onafterprint = () => { try { printWindow.close(); } catch {} };
   };
 
   return (

@@ -1,7 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import ToastProvider from '@/components/ToastProvider';
 import FloatingKakao from '@/components/FloatingKakao';
 import FloatingHome from '@/components/FloatingHome';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+};
 
 export const metadata: Metadata = {
   title: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
@@ -12,6 +18,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
+      <head>
+        <style>{`@media print { header, footer, nav, .no-print { display: none !important; } body { background: white !important; } }`}</style>
+      </head>
       <body style={{
         minHeight: '100vh',
         display: 'flex',
@@ -19,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         background: 'linear-gradient(180deg, #FEFBF6 0%, #FFF9EE 30%, #F5F0E8 100%)',
         backgroundAttachment: 'fixed',
       }}>
-        <header style={{
+        <header className="no-print" style={{
           position: 'fixed',
           top: 0,
           right: 0,
@@ -27,8 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           background: 'rgba(74,124,89,0.95)',
           backdropFilter: 'blur(8px)',
           color: 'white',
-          padding: '0.75rem 1.5rem',
-          fontSize: '1rem',
+          padding: '0.5rem 1rem',
+          fontSize: '0.9rem',
           fontWeight: 600,
           borderRadius: '0 0 0 12px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.15)',

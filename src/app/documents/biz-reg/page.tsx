@@ -3,7 +3,12 @@
 import { useState } from 'react';
 
 export default function BizRegPage() {
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    const prev = document.title;
+    document.title = '제천다사랑간병사업자등록증';
+    window.print();
+    setTimeout(() => { document.title = prev; }, 500);
+  };
 
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '1rem' }}>
@@ -38,6 +43,7 @@ export default function BizRegPage() {
       <style jsx>{`
         @media print {
           .no-print { display: none !important; }
+          img { max-height: 270mm; width: auto; object-fit: contain; }
         }
       `}</style>
     </div>

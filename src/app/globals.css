@@ -16,6 +16,25 @@
 body {
   background: var(--cream);
   color: #3D3929;
+  /* 모바일 대응: fixed header 밀림 방지 + 터치 최적화 */
+  padding-top: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ── 모바일 반응형 ── */
+@media (max-width: 768px) {
+  html { font-size: 15px; }
+  body { padding-top: 3rem; } /* fixed header 공간 확보 */
+  input, select, textarea, button {
+    font-size: 16px !important; /* iOS zoom 방지 */
+  }
+  /* 테이블 가로 스크롤 */
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 14px; }
 }
 
 @layer components {

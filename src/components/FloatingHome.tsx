@@ -2,7 +2,7 @@
 
 export default function FloatingHome() {
   return (
-    <div style={{
+    <div className="no-print" style={{
       position: 'fixed',
       bottom: '1.5rem',
       left: '1.5rem',

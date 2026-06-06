@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { getCaregivers, type Caregiver, getHospitals, type Hospital } from '@/lib/caregiverStore';
+import { db } from '@/lib/firebase';
+import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc as fireDoc } from 'firebase/firestore';
+import { getCaregivers, type Caregiver, getHospitals, type Hospital, getPatients, type Patient } from '@/lib/caregiverStore';
 import SignaturePad, { SignaturePrint } from '@/components/SignaturePad';
 
 function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -39,12 +41,22 @@ export default function ConfirmationPage() {
 
   const [careCost, setCareCost] = useState('');
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [selectedHospId, setSelectedHospId] = useState('');
+  const [selectedPatId, setSelectedPatId] = useState('');
   const [selectedCg1Id, setSelectedCg1Id] = useState('');
   const [selectedCg2Id, setSelectedCg2Id] = useState('');
   const [sigCg1, setSigCg1] = useState('');
   const [sigCg2, setSigCg2] = useState('');
+  const [hasCg1Attendance, setHasCg1Attendance] = useState<boolean | null>(null);
+  const [hasCg2Attendance, setHasCg2Attendance] = useState<boolean | null>(null);
+
+  // ── 저장 관련 ──
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [savedList, setSavedList] = useState<{ id: string; data: any }[]>([]);
+  const [showSaved, setShowSaved] = useState(false);
 
   const [timeOverrides, setTimeOverrides] = useState<Record<number, { start1: string; end1: string; start2: string; end2: string }>>({});
 
@@ -82,26 +94,134 @@ export default function ConfirmationPage() {
   };
   const isAllTimesSet = timeEntries.length > 0 && timeEntries.every(e => e.start1 === '09' && e.end1 === '18');
 
-  useEffect(() => { setCaregivers(getCaregivers()); setHospitals(getHospitals()); }, []);
+  useEffect(() => { getCaregivers().then(setCaregivers); getHospitals().then(setHospitals); getPatients().then(setPatients); }, []);
 
   const handleSelectHospital = (id: string) => {
     setSelectedHospId(id);
-    const h = getHospitals().find(hh => hh.id === id);
+    const h = hospitals.find(hh => hh.id === id);
     if (h) setHospital(h.name);
   };
 
-  const handleSelectCg1 = (id: string) => {
-    setSelectedCg1Id(id);
-    const cg = getCaregivers().find(c => c.id === id);
-    if (cg) { setCg1Name(cg.name); setCg1Phone(cg.phone); setCg1Birth(cg.birth); }
-  };
-  const handleSelectCg2 = (id: string) => {
-    setSelectedCg2Id(id);
-    const cg = getCaregivers().find(c => c.id === id);
-    if (cg) { setCg2Name(cg.name); setCg2Phone(cg.phone); setCg2Birth(cg.birth); }
+  const handleSelectPatient = (id: string) => {
+    setSelectedPatId(id);
+    const p = patients.find(pp => pp.id === id);
+    if (p) {
+      setPatientName(p.patientName);
+      setPatientPhone(p.patientPhone || '');
+      setPatientBirth(p.birthDate || '');
+    }
   };
 
-  const handlePrint = () => window.print();
+  const handleSelectCg1 = async (id: string) => {
+    setSelectedCg1Id(id);
+    setHasCg1Attendance(null);
+    const cg = caregivers.find(c => c.id === id);
+    if (cg) { setCg1Name(cg.name); setCg1Phone(cg.phone); setCg1Birth(cg.birth); }
+    if (id) {
+      try {
+        const q = query(collection(db, 'attendance'), where('caregiverId', '==', id));
+        const snap = await getDocs(q);
+        setHasCg1Attendance(!snap.empty);
+      } catch { setHasCg1Attendance(false); }
+    }
+  };
+  const handleSelectCg2 = async (id: string) => {
+    setSelectedCg2Id(id);
+    setHasCg2Attendance(null);
+    const cg = caregivers.find(c => c.id === id);
+    if (cg) { setCg2Name(cg.name); setCg2Phone(cg.phone); setCg2Birth(cg.birth); }
+    if (id) {
+      try {
+        const q = query(collection(db, 'attendance'), where('caregiverId', '==', id));
+        const snap = await getDocs(q);
+        setHasCg2Attendance(!snap.empty);
+      } catch { setHasCg2Attendance(false); }
+    }
+  };
+
+  const handlePrint = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const prev = document.title;
+    document.title = `${today}_${patientName || '환자'}_간병인사용확인서`;
+    window.print();
+    setTimeout(() => { document.title = prev; }, 500);
+  };
+
+  // ── 저장 함수 ──
+  const loadSavedList = async () => {
+    try {
+      const snap = await getDocs(collection(db, 'confirmations'));
+      const list: typeof savedList = [];
+      snap.forEach(d => list.push({ id: d.id, data: d.data() }));
+      setSavedList(list);
+    } catch { /* ignore */ }
+  };
+
+  useEffect(() => { if (showSaved) loadSavedList(); }, [showSaved]);
+
+  const handleSave = async () => {
+    if (!patientName) { alert('환자명을 입력해주세요'); return; }
+    setSaving(true);
+    const data = {
+      patientName, patientBirth, patientPhone, hospital, admitStart, admitEnd,
+      cg1Name, cg1Birth, cg1Phone, cg2Name, cg2Birth, cg2Phone,
+      careCost, sigCg1, sigCg2, timeOverrides,
+      updatedAt: new Date().toISOString(),
+    };
+    try {
+      if (savedId) {
+        await updateDoc(fireDoc(db, 'confirmations', savedId), data);
+      } else {
+        const ref = await addDoc(collection(db, 'confirmations'), { ...data, createdAt: new Date().toISOString() });
+        setSavedId(ref.id);
+      }
+      alert('저장되었습니다!');
+    } catch { alert('저장 실패'); }
+    setSaving(false);
+  };
+
+  const handleLoad = (log: { id: string; data: any }) => {
+    const d = log.data;
+    setPatientName(d.patientName || '');
+    setPatientBirth(d.patientBirth || '');
+    setPatientPhone(d.patientPhone || '');
+    setHospital(d.hospital || '');
+    setAdmitStart(d.admitStart || '');
+    setAdmitEnd(d.admitEnd || '');
+    setCg1Name(d.cg1Name || '');
+    setCg1Birth(d.cg1Birth || '');
+    setCg1Phone(d.cg1Phone || '');
+    setCg2Name(d.cg2Name || '');
+    setCg2Birth(d.cg2Birth || '');
+    setCg2Phone(d.cg2Phone || '');
+    setCareCost(d.careCost || '');
+    setSigCg1(d.sigCg1 || '');
+    setSigCg2(d.sigCg2 || '');
+    setTimeOverrides(d.timeOverrides || {});
+    setSavedId(log.id);
+    setShowSaved(false);
+    setHasCg1Attendance(null);
+    setHasCg2Attendance(null);
+  };
+
+  const handleDelete = async () => {
+    if (!savedId || !confirm('정말 삭제하시겠습니까?')) return;
+    try { await deleteDoc(fireDoc(db, 'confirmations', savedId)); setSavedId(null); alert('삭제되었습니다'); }
+    catch { alert('삭제 실패'); }
+  };
+
+  const handleDeleteById = async (id: string) => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    try { await deleteDoc(fireDoc(db, 'confirmations', id)); setSavedList(prev => prev.filter(l => l.id !== id)); if (savedId === id) setSavedId(null); }
+    catch { alert('삭제 실패'); }
+  };
+
+  // 출퇴근 차단 확인
+  const blocked = (selectedCg1Id && hasCg1Attendance === false) || (selectedCg2Id && hasCg2Attendance === false);
+  const blockReasons: string[] = [];
+  if (selectedCg1Id && hasCg1Attendance === false) blockReasons.push(`${cg1Name || '간병인1'}님`);
+  if (selectedCg2Id && hasCg2Attendance === false) blockReasons.push(`${cg2Name || '간병인2'}님`);
+  const checking = (selectedCg1Id && hasCg1Attendance === null) || (selectedCg2Id && hasCg2Attendance === null);
 
   const updateEntry = (i: number, field: string, value: string) => {
     setTimeOverrides(prev => ({ ...prev, [i]: { ...(prev[i] || { start1: '', end1: '', start2: '', end2: '' }), [field]: value } }));
@@ -125,6 +245,15 @@ export default function ConfirmationPage() {
       <div className="no-print" style={{ padding: '1.25rem', background: '#F8FAF8', borderRadius: '0.75rem', border: '1px solid #E0E8E0', marginBottom: '1.5rem' }}>
         <h4 style={{ color: '#4A7C59', marginBottom: '0.75rem' }}>1. 피보험자 인적사항</h4>
         <div style={grid4}>
+          <div>
+            <label style={lbl}>🛌 환자·보호자 선택</label>
+            <select style={inp} value={selectedPatId} onChange={e => handleSelectPatient(e.target.value)}>
+              <option value="">직접 입력</option>
+              {patients.map(p => (
+                <option key={p.id} value={p.id}>{p.patientName} / {p.guardianName}</option>
+              ))}
+            </select>
+          </div>
           <div><label style={lbl}>성명</label><input style={inp} value={patientName} onChange={e => setPatientName(e.target.value)} /></div>
           <div><label style={lbl}>생년월일</label><input type="date" style={inp} value={patientBirth} onChange={e => setPatientBirth(e.target.value)} /></div>
           <div><label style={lbl}>전화번호</label><input style={inp} value={patientPhone} onChange={e => setPatientPhone(e.target.value)} placeholder="010-0000-0000" /></div>
@@ -179,6 +308,22 @@ export default function ConfirmationPage() {
         </div>
       </div>
 
+      {/* 출퇴근 기록 확인 */}
+      {checking && (
+        <div className="no-print" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#FFF8E1', borderRadius: '0.5rem', border: '1px solid #FFE082', fontSize: '0.875rem', color: '#E65100' }}>
+          ⏳ 출퇴근 기록 확인 중...
+        </div>
+      )}
+      {blocked && (
+        <div className="no-print" style={{ marginBottom: '1rem', padding: '1rem', background: '#FFEBEE', borderRadius: '0.5rem', border: '1px solid #EF9A9A' }}>
+          <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: '#C62828', marginBottom: '0.25rem' }}>⚠️ 출퇴근 기록 없음</div>
+          <div style={{ fontSize: '0.8125rem', color: '#B71C1C', lineHeight: '1.6' }}>
+            {blockReasons.join(', ')}의 출퇴근 기록이 없습니다.<br />
+            먼저 <strong>출퇴근 관리</strong>에서 출퇴근을 등록한 후 사용 확인서를 작성할 수 있습니다.
+          </div>
+        </div>
+      )}
+
       <div style={{ border: '2px solid #333', padding: '1.5rem', background: 'white', fontSize: '0.8125rem' }}>
         <h3 style={{ textAlign: 'center', fontSize: '1.125rem', fontWeight: 'bold', textDecoration: 'underline', marginBottom: '1.25rem' }}>
           간병인 사용 확인서
@@ -206,7 +351,7 @@ export default function ConfirmationPage() {
             <tr><td style={th2}>소속회사명</td><td style={td2}>다사랑 간병</td><td style={th2}>전화번호</td><td style={td2}>01022751946</td><td style={th2}>간병비</td><td style={td2}>{careCost}</td></tr>
           </tbody></table>
 
-          {timeEntries.length > 0 && (
+          {timeEntries.length > 0 && !blocked && (
             <div className="no-print" style={{ marginTop: '0.5rem' }}>
               <button onClick={toggleDefaultTimes} style={{ padding: '0.375rem 0.75rem', border: 'none', borderRadius: '0.375rem', fontSize: '0.8125rem', fontWeight: 600, cursor: 'pointer', background: isAllTimesSet ? '#C62828' : '#4A7C59', color: 'white' }}>
                 ⏰ {isAllTimesSet ? '출퇴근 해제' : '정시출퇴근 (09~18시)'}
@@ -276,17 +421,65 @@ export default function ConfirmationPage() {
         <div style={{ textAlign: 'center', fontWeight: 'bold' }}>사업자 번호: 141-94-02083 다사랑 간병</div>
       </div>
 
-      <div className="no-print" style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-        <button onClick={handlePrint} style={{ padding: '0.75rem 2rem', background: '#4A7C59', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>🖨️ 인쇄 / PDF 저장</button>
+      <div className="no-print" style={{ marginTop: '1.5rem', textAlign: 'center', display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button onClick={handleSave} disabled={saving} style={{
+          padding: '0.75rem 2rem', background: saving ? '#999' : '#1565C0', color: 'white',
+          border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: saving ? 'not-allowed' : 'pointer',
+        }}>
+          {saving ? '⏳ 저장 중...' : savedId ? '📝 업데이트' : '💾 사용확인서 저장'}
+        </button>
+        <button onClick={() => setShowSaved(!showSaved)} style={{
+          padding: '0.75rem 1.5rem', background: '#6A1B9A', color: 'white',
+          border: 'none', borderRadius: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', cursor: 'pointer',
+        }}>
+          📂 저장목록 ({savedList.length})
+        </button>
+        {savedId && (
+          <button onClick={handleDelete} style={{
+            padding: '0.75rem 1.5rem', background: '#C62828', color: 'white',
+            border: 'none', borderRadius: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold', cursor: 'pointer',
+          }}>🗑️ 삭제</button>
+        )}
+        {blocked ? (
+          <div style={{ padding: '0.75rem', background: '#FFF3E0', borderRadius: '0.5rem', border: '1px solid #FFE0B2', fontSize: '0.875rem', color: '#E65100' }}>
+            ⚠️ 출퇴근 기록 등록 후 인쇄할 수 있습니다
+          </div>
+        ) : timeEntries.length > 0 && (
+          <button onClick={handlePrint} style={{ padding: '0.75rem 2rem', background: '#4A7C59', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>🖨️ 인쇄 / PDF 저장</button>
+        )}
       </div>
+
+      {/* 저장목록 */}
+      {showSaved && (
+        <div className="no-print" style={{ marginTop: '1rem', padding: '1rem', background: '#F8F8FF', borderRadius: '0.75rem', border: '1px solid #E0E0F0', maxHeight: '300px', overflowY: 'auto' }}>
+          <h4 style={{ marginBottom: '0.5rem', color: '#6A1B9A' }}>📂 저장된 사용확인서</h4>
+          {savedList.length === 0 ? (
+            <div style={{ color: '#999', fontSize: '0.85rem' }}>저장된 확인서가 없습니다</div>
+          ) : (
+            savedList.map(log => (
+              <div key={log.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', borderBottom: '1px solid #EEE', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <strong style={{ fontSize: '0.875rem' }}>{log.data.patientName || '(환자명 없음)'}</strong>
+                  <span style={{ fontSize: '0.75rem', color: '#888', marginLeft: '0.75rem' }}>
+                    {log.data.hospital} · {log.data.admitStart}~{log.data.admitEnd}
+                  </span>
+                </div>
+                <button onClick={() => handleLoad(log)} style={{ padding: '0.25rem 0.75rem', background: '#1565C0', color: 'white', border: 'none', borderRadius: '0.3rem', fontSize: '0.75rem', cursor: 'pointer' }}>불러오기</button>
+                <button onClick={() => handleDeleteById(log.id)} style={{ padding: '0.25rem 0.5rem', background: '#C62828', color: 'white', border: 'none', borderRadius: '0.3rem', fontSize: '0.75rem', cursor: 'pointer' }}>삭제</button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       <style jsx>{`
         @media print {
           .no-print { display: none !important; }
           .print-only { display: inline !important; }
-          body { font-size: 9px; }
-          table { font-size: 7.5px; }
-          th, td { padding: 1px 3px !important; }
+          body { font-size: 8px; }
+          table { font-size: 7px; }
+          th, td { padding: 0 2px !important; }
+          h3 { font-size: 13px !important; margin-bottom: 0.5rem !important; }
         }
       `}</style>
     </div>

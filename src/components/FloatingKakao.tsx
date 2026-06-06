@@ -41,7 +41,7 @@ export default function FloatingKakao() {
   };
 
   return (
-    <div style={{
+    <div className="no-print" style={{
       position: 'fixed',
       bottom: '1.5rem',
       right: '1.5rem',

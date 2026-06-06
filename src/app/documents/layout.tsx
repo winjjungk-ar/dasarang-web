@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function DocumentsLayout({ children }: { children: React.ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
@@ -28,11 +29,28 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
   return (
     <>
       {children}
+      <div className="no-print" style={{ maxWidth: '1200px', margin: '2rem auto 0', padding: '1rem 0', borderTop: '1px solid #E0E0E0' }}>
+        <Link href="/erp" style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+          padding: '0.5rem 1rem', background: '#2D5A3D', color: '#fff',
+          borderRadius: '0.5rem', textDecoration: 'none', fontSize: '0.85rem',
+          fontWeight: 600,
+        }}>
+          ← ERP 메인
+        </Link>
+      </div>
       <style dangerouslySetInnerHTML={{ __html: `
-        @page { size: A4; margin: 8mm; }
+        @page { size: A4 portrait; margin: 0; }
         @media print {
-          nav, footer, .no-print { display: none !important; }
-          body { padding-top: 0 !important; margin: 0 !important; background: white !important; }
+          html, body {
+            width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          body { padding: 0 !important; overflow: hidden !important; }
+          nav, footer, header, .no-print { display: none !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}} />
     </>

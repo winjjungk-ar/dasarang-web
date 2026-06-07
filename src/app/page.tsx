@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import CountUp from '@/components/CountUp';
 import ServiceMap from '@/components/ServiceMap';
+import { getBlogPosts, isNewPost } from '@/lib/blog';
 
 export default function HomePage() {
 function getSeason() {
@@ -167,6 +168,84 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
           </div>
         </div>
       </section>
+
+      {/* 최신 간병 정보 */}
+      {(() => {
+        const latestPosts = getBlogPosts().slice(0, 2);
+        if (latestPosts.length === 0) return null;
+        return (
+          <section style={{ padding: '4rem 0', background: 'white' }}>
+            <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '0 1rem' }}>
+              <div style={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                marginBottom: '2rem', flexWrap: 'wrap', gap: '0.5rem',
+              }}>
+                <div>
+                  <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#5B8C5A', marginBottom: '0.25rem' }}>
+                    📝 최신 간병 정보
+                  </h2>
+                  <p style={{ color: '#6B7280', fontSize: '0.9375rem' }}>
+                    간병에 도움되는 최신 정보를 확인하세요
+                  </p>
+                </div>
+                <a href="/blog" style={{
+                  color: '#4A7C59', fontWeight: 600, textDecoration: 'none',
+                  padding: '0.5rem 1rem', borderRadius: '0.75rem', border: '2px solid #4A7C59',
+                  fontSize: '0.875rem', whiteSpace: 'nowrap',
+                }}>
+                  전체보기 →
+                </a>
+              </div>
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '1.25rem',
+              }}>
+                {latestPosts.map((post) => (
+                  <a key={post.slug} href={`/blog/${post.slug}`} style={{
+                    background: '#FEFBF6',
+                    borderRadius: '1.25rem',
+                    padding: '1.75rem',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    border: '1px solid #F0E8D8',
+                    boxShadow: '0 2px 12px rgba(139, 119, 90, 0.08)',
+                    position: 'relative',
+                    display: 'flex', flexDirection: 'column', gap: '0.625rem',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                  }}>
+                    {isNewPost(post.date) && (
+                      <span style={{
+                        position: 'absolute', top: '0.75rem', right: '0.75rem',
+                        background: '#E65100', color: 'white',
+                        padding: '0.2rem 0.5rem', borderRadius: '0.5rem',
+                        fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.05em',
+                      }}>NEW</span>
+                    )}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
+                      {post.tags.slice(0, 2).map((tag) => (
+                        <span key={tag} style={{
+                          background: '#E8F5E9', color: '#4A7C59',
+                          padding: '0.15rem 0.5rem', borderRadius: '0.75rem',
+                          fontSize: '0.6875rem', fontWeight: 600,
+                        }}>#{tag}</span>
+                      ))}
+                    </div>
+                    <h3 style={{ fontSize: '1.125rem', fontWeight: 'bold', color: '#3D3929', lineHeight: 1.4 }}>
+                      {post.title}
+                    </h3>
+                    <p style={{ color: '#6B7280', fontSize: '0.875rem', lineHeight: 1.6 }}>
+                      {post.excerpt}
+                    </p>
+                    <div style={{ color: '#9CA3AF', fontSize: '0.75rem', marginTop: 'auto' }}>
+                      {post.date}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
             {/* Dual CTA Block */}
       <section style={{ padding: '3rem 0', background: 'white' }}>

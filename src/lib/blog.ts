@@ -8,6 +8,14 @@ export interface BlogPost extends BlogPostData {
   contentHtml: string;
 }
 
+/** 7일 이내 글이면 true */
+export function isNewPost(date: string): boolean {
+  const postDate = new Date(date);
+  const now = new Date();
+  const diff = now.getTime() - postDate.getTime();
+  return diff < 7 * 24 * 60 * 60 * 1000;
+}
+
 /**
  * 모든 블로그 포스트를 date 기준 최신순으로 반환합니다 (HTML 제외 — 목록용).
  */

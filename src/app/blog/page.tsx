@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { getBlogPosts } from '@/lib/blog';
+import { getBlogPosts, isNewPost } from '@/lib/blog';
 
 export const metadata: Metadata = {
   title: '간병 정보 블로그 - 다사랑 간병',
@@ -74,8 +74,18 @@ export default function BlogPage() {
                   flexDirection: 'column',
                   gap: '0.75rem',
                   transition: 'transform 0.2s, box-shadow 0.2s',
+                  position: 'relative',
                 }}
               >
+                {/* NEW 배지 */}
+                {isNewPost(post.date) && (
+                  <span style={{
+                    position: 'absolute', top: '0.75rem', right: '0.75rem',
+                    background: '#E65100', color: 'white',
+                    padding: '0.2rem 0.5rem', borderRadius: '0.5rem',
+                    fontSize: '0.6875rem', fontWeight: 700, letterSpacing: '0.05em',
+                  }}>NEW</span>
+                )}
                 {/* 태그 */}
                 {post.tags.length > 0 && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>

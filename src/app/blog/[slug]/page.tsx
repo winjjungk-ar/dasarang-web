@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getBlogPosts, getBlogPost } from '@/lib/blog';
+import { getBlogPosts, getBlogPost, isNewPost } from '@/lib/blog';
 import AdSense from '@/components/AdSense';
 
 interface Props {
@@ -69,6 +69,13 @@ export default function BlogPostPage({ params }: Props) {
                   #{tag}
                 </span>
               ))}
+              {isNewPost(post.date) && (
+                <span style={{
+                  background: '#FF6D00', color: 'white',
+                  padding: '0.2rem 0.625rem', borderRadius: '1rem',
+                  fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em',
+                }}>NEW</span>
+              )}
             </div>
           )}
           <h1

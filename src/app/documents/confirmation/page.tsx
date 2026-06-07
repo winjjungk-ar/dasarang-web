@@ -145,12 +145,8 @@ export default function ConfirmationPage() {
     const docTitle = `${today}_${name}_사용확인서`;
 
     // iframe 방식 — 팝업 차단 우회
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    const printWindow = iframe.contentWindow!;
-
-    const timeRows = timeEntries.map(e => {
+    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
+    const html = `
       const d = new Date(e.date + 'T00:00:00');
       const dateStr = `${d.getMonth() + 1}월 ${d.getDate()}일`;
       const dur1 = calcDuration(e.start1, e.end1);
@@ -260,13 +256,15 @@ export default function ConfirmationPage() {
   </div>
 </body>
 </html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
-    setTimeout(() => {
-      printWindow.print();
-    }, 200);
-    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
+</html>`;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    if (!w) { window.print(); return; }
+    w.onload = () => {
+      w.print();
+      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
+    };
   };
 
   // ── 저장 함수 ──

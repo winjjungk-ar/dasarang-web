@@ -26,14 +26,8 @@ export default function EmploymentCertPage() {
     const name = caregiverName || '재직증명서';
     const docTitle = `${today}_${name}_재직증명서`;
 
-    // iframe 방식 — 팝업 차단 우회
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    const printWindow = iframe.contentWindow!;
-
-    // mm 단위 고정 — rem 의존 제거 (Android rem 기준 불확실)
-    printWindow.document.write(`<!DOCTYPE html>
+    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
+    const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -102,15 +96,15 @@ export default function EmploymentCertPage() {
     </div>
   </div>
 </body>
-</html>`);
-    printWindow.document.close();
-    // 모바일: print()가 논블로킹이라 자동 닫기 하면 인쇄 전에 창이 닫힘
-    printWindow.focus();
-    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
-    setTimeout(() => {
-      printWindow.print();
-    }, 200);
-    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
+</html>`;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    if (!w) { window.print(); return; }
+    w.onload = () => {
+      w.print();
+      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
+    };
   };
 
   const formatDate = (dateStr: string) => {

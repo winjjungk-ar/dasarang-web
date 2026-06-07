@@ -95,12 +95,8 @@ export default function CareLogPage() {
     const docTitle = `${today}_${patientName || '환자'}_간병일지`;
 
     // iframe 방식 — 팝업 차단 우회
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    const printWindow = iframe.contentWindow!;
-
-    // 날짜 포맷 헬퍼 (인쇄용 HTML 내에서 사용)
+    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
+    const html = `
     const fmtPrint = (d: string) => {
       if (!d) return '';
       const dt = new Date(d + 'T00:00:00');
@@ -231,13 +227,15 @@ export default function CareLogPage() {
   </div>
 </body>
 </html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
-    setTimeout(() => {
-      printWindow.print();
-    }, 200);
-    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
+</html>`;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    if (!w) { window.print(); return; }
+    w.onload = () => {
+      w.print();
+      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
+    };
   };
 
   // ── 저장 함수 ──

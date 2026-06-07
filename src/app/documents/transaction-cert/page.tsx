@@ -88,12 +88,8 @@ export default function TransactionCertPage() {
     const docTitle = `${today}_${name}_거래명세서`;
 
     // iframe 방식 — 팝업 차단 우회
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    const printWindow = iframe.contentWindow!;
-
-    const now = new Date();
+    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
+    const html = `
     const todayStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
 
     // 거래내역 행 생성
@@ -190,13 +186,15 @@ export default function TransactionCertPage() {
   </div>
 </body>
 </html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    // setTimeout으로 DOM 파싱 완료 후 print() 호출 (모바일 "미리보기 준비중" 방지)
-    setTimeout(() => {
-      printWindow.print();
-    }, 200);
-    printWindow.onafterprint = () => { setTimeout(() => iframe.remove(), 500); };
+</html>`;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, '_blank');
+    if (!w) { window.print(); return; }
+    w.onload = () => {
+      w.print();
+      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
+    };
   };
 
   if (loading) return <div style={{ textAlign: 'center', padding: '4rem', color: '#999' }}>⏳ 로딩 중...</div>;

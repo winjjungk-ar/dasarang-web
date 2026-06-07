@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import ToastProvider from '@/components/ToastProvider';
 import FloatingKakao from '@/components/FloatingKakao';
 import FloatingHome from '@/components/FloatingHome';
+import AuthProvider from '@/components/AuthProvider';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -19,6 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <head>
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+          crossOrigin="anonymous"
+        />
         <style>{`@media print {
           header, footer, nav, .no-print { display: none !important; }
           html, body { background: white !important; background-image: none !important; }
@@ -30,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         display: 'flex',
         flexDirection: 'column',
       }}>
+        <AuthProvider />
         <header className="no-print" style={{
           position: 'fixed',
           top: 0,

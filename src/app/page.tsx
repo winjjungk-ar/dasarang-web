@@ -497,6 +497,7 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
               { href: '/about', icon: '🌿', title: '회사 소개', desc: '무사고 2년, 고객만족 100%', badge: '🏆 신뢰', bg: '#E8F5E9', color: '#4A7C59' },
               { href: '/documents', icon: '📂', title: '서류 발급', desc: '간병일지·확인서·증명서 발급', badge: '📋 업무', bg: '#FFF3E0', color: '#E65100' },
               { href: '/notice', icon: '📢', title: '공지사항', desc: '새로운 소식과 이벤트', badge: '📌 알림', bg: '#F0F7F0', color: '#5B8C5A' },
+              { href: '/blog', icon: '📝', title: '간병 정보', desc: '유용한 정보와 최신 가이드', badge: '📰 정보', bg: '#FFF8E1', color: '#F57C00' },
               { href: '/faq', icon: '💬', title: '자주 묻는 질문', desc: '궁금증을 빠르게 해결', badge: '❓ 도움말', bg: '#F5FAF5', color: '#6B9B5A' },
             ].map((link) => (
               <a key={link.href} href={link.href} style={{

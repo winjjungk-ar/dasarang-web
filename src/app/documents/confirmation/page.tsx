@@ -144,9 +144,9 @@ export default function ConfirmationPage() {
     const name = patientName || '환자';
     const docTitle = `${today}_${name}_사용확인서`;
 
-    // iframe 방식 — 팝업 차단 우회
-    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
-    const html = `
+    // Blob URL 
+
+    const timeRows = timeEntries.map(e => {
       const d = new Date(e.date + 'T00:00:00');
       const dateStr = `${d.getMonth() + 1}월 ${d.getDate()}일`;
       const dur1 = calcDuration(e.start1, e.end1);
@@ -176,7 +176,7 @@ export default function ConfirmationPage() {
     const now = new Date();
     const writeDate = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
 
-    printWindow.document.write(`<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -185,29 +185,27 @@ export default function ConfirmationPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; height: 297mm;
+      width: 210mm; min-height: 297mm;
       margin: 0; padding: 0;
-      overflow: hidden;
-      background: white;
-      font-family: sans-serif;
+      background: white; font-family: sans-serif;
     }
-    .container { margin: 10mm 10mm; padding: 8mm 10mm; min-height: calc(297mm - 20mm); }
-    h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 5mm; color: #111; }
-    .section { border: 1px solid #333; margin-bottom: 2mm; padding: 3mm; }
-    .section-title { font-size: 3.8mm; font-weight: 700; margin-bottom: 1.5mm; }
+    .page { padding: 12mm 15mm; width: 210mm; }
+    h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 8mm; color: #111; }
+    .section { border: 1px solid #333; margin-bottom: 4mm; padding: 4mm; }
+    .section-title { font-size: 3.8mm; font-weight: 700; margin-bottom: 2mm; }
     table { width: 100%; border-collapse: collapse; }
-    td, th { border: 1px solid #555; padding: 1.5mm 2mm; font-size: 3.5mm; text-align: center; vertical-align: middle; }
+    td, th { border: 1px solid #555; padding: 2mm 3mm; font-size: 3.5mm; text-align: center; vertical-align: middle; }
     th { background: #F0F0F0; font-weight: 700; }
-    .confirm { text-align: center; font-size: 4mm; font-weight: 700; margin: 3mm 0; padding: 3mm; border: 1px solid #333; }
-    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 5mm; }
+    .confirm { text-align: center; font-size: 4mm; font-weight: 700; margin: 5mm 0; padding: 4mm; border: 1px solid #333; }
+    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8mm; }
     .sig { text-align: center; flex: 1; font-size: 3.5mm; }
     .sig img { display: block; margin: 0 auto 1mm; }
-    .total { text-align: right; font-size: 4mm; font-weight: 700; color: #4A7C59; margin-top: 1mm; }
-    .bizno { text-align: center; font-weight: 700; font-size: 3.5mm; margin-top: 3mm; }
+    .total { text-align: right; font-size: 4mm; font-weight: 700; color: #4A7C59; margin-top: 2mm; }
+    .bizno { text-align: center; font-weight: 700; font-size: 3.5mm; margin-top: 5mm; }
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="page">
     <h2>간병인 사용 확인서</h2>
 
     <div class="section">
@@ -255,7 +253,6 @@ export default function ConfirmationPage() {
     <div class="bizno">사업자 번호: 141-94-02083 다사랑 간병</div>
   </div>
 </body>
-</html>`);
 </html>`;
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);

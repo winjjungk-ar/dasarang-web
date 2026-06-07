@@ -87,9 +87,9 @@ export default function TransactionCertPage() {
     const name = patientName || '환자';
     const docTitle = `${today}_${name}_거래명세서`;
 
-    // iframe 방식 — 팝업 차단 우회
-    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
-    const html = `
+    // Blob URL 
+
+    const now = new Date();
     const todayStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
 
     // 거래내역 행 생성
@@ -102,7 +102,7 @@ export default function TransactionCertPage() {
     ).join('');
 
     // mm 단위 고정 — A4 전용
-    printWindow.document.write(`<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -118,10 +118,10 @@ export default function TransactionCertPage() {
       font-family: sans-serif;
     }
     .cert {
-      margin: 10mm 10mm;
+      margin: 8mm 10mm;
       border: 2px solid #333;
-      padding: 4mm 6mm;
-      min-height: calc(297mm - 20mm);
+      padding: 6mm 8mm;
+      height: calc(297mm - 16mm);
     }
     h3 {
       text-align: center; font-size: 6mm; font-weight: 800;
@@ -184,8 +184,6 @@ export default function TransactionCertPage() {
       다 사 랑 간 병 공 동 체 (인)
     </div>
   </div>
-</body>
-</html>`);
 </html>`;
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);

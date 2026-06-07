@@ -26,7 +26,9 @@ export default function EmploymentCertPage() {
     const name = caregiverName || '재직증명서';
     const docTitle = `${today}_${name}_재직증명서`;
 
-    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
+    // Blob URL 
+
+    // mm 단위 고정 — rem 의존 제거 (Android rem 기준 불확실)
     const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -43,14 +45,14 @@ export default function EmploymentCertPage() {
       font-family: sans-serif;
     }
     .cert {
-      margin: 10mm 10mm;
+      margin: 10mm 12mm;
       border: 2px solid #333;
       padding: 8mm 10mm;
-      min-height: calc(297mm - 20mm);
+      height: calc(297mm - 20mm);
     }
     h3 {
       text-align: center; font-size: 7mm; font-weight: 800;
-      letter-spacing: 1.5mm; margin-bottom: 6mm; color: #111;
+      letter-spacing: 1.5mm; margin-bottom: 8mm; color: #111;
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
@@ -58,8 +60,8 @@ export default function EmploymentCertPage() {
       font-size: 3.8mm; text-align: center; vertical-align: middle;
     }
     th { background: #F5F5F5; font-weight: 700; font-size: 3.5mm; color: #333; width: 18%; }
-    .proof { text-align: center; margin: 65mm 0 68mm 0; font-size: 4mm; font-weight: 500; }
-    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6mm; padding-top: 4mm; }
+    .proof { text-align: center; margin: 35mm 0 38mm 0; font-size: 4mm; font-weight: 500; }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10mm; padding-top: 5mm; }
     .issuer { text-align: center; flex: 2; }
     .issuer .name { font-weight: 800; font-size: 4.5mm; letter-spacing: 0.5mm; }
     .issuer .sub { font-size: 3.8mm; margin-top: 1mm; }

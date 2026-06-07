@@ -4,9 +4,9 @@ import { useState } from 'react';
 
 export default function BizRegPage() {
   const handlePrint = () => {
-    // iframe 방식 — 팝업 차단 우회
-    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
-    const html = `
+    // Blob URL 
+
+    const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -15,14 +15,12 @@ export default function BizRegPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow: hidden; background: white; }
-    img { width: 190mm; height: 277mm; margin: 10mm 10mm; object-fit: contain; }
+    img { width: 100%; height: 100%; object-fit: contain; }
   </style>
 </head>
 <body>
   <img src="${window.location.origin}/biz-reg.jpg" alt="사업자등록증"
     onerror="this.style.display='none';document.body.innerHTML='<div style=padding:20mm;text-align:center;color:#999;font-size:5mm>사업자등록증 이미지가 없습니다.<br><br><code>public/biz-reg.jpg</code> 파일을 추가해주세요.</div>'"/>
-</body>
-</html>`);
 </html>`;
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);

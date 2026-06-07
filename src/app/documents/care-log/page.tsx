@@ -94,9 +94,9 @@ export default function CareLogPage() {
     const today = new Date().toISOString().split('T')[0];
     const docTitle = `${today}_${patientName || '환자'}_간병일지`;
 
-    // iframe 방식 — 팝업 차단 우회
-    // Blob URL 방식 — 실제 페이지 로드로 @page 정상 작동
-    const html = `
+    // Blob URL 
+
+    // 날짜 포맷 헬퍼 (인쇄용 HTML 내에서 사용)
     const fmtPrint = (d: string) => {
       if (!d) return '';
       const dt = new Date(d + 'T00:00:00');
@@ -143,7 +143,7 @@ export default function CareLogPage() {
     const now = new Date();
     const nowStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
 
-    printWindow.document.write(`<!DOCTYPE html>
+    const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -159,9 +159,10 @@ export default function CareLogPage() {
       font-family: 'Noto Serif KR', serif;
     }
     .container {
-      margin: 10mm;
+      margin: 8mm 12mm;
       border: 2px solid #333;
       padding: 6mm 8mm;
+      height: calc(297mm - 16mm);
     }
     h3 {
       text-align: center; font-size: 6mm; font-weight: 800;
@@ -169,16 +170,16 @@ export default function CareLogPage() {
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
-      border: 1px solid #999; padding: 3mm 4mm;
-      font-size: 3.8mm; text-align: center; vertical-align: middle;
+      border: 1px solid #999; padding: 2mm 3mm;
+      font-size: 3.5mm; text-align: center; vertical-align: middle;
     }
-    th { background: #F0F0F0; font-weight: 600; font-size: 3.5mm; color: #333; }
+    th { background: #F0F0F0; font-weight: 600; font-size: 3.2mm; color: #333; }
     .info-table th { width: 16%; }
-    .signatures { display: flex; justify-content: center; gap: 10mm; margin: 60mm 0 62mm 0; padding-top: 3mm; border-top: 1px solid #999; }
+    .signatures { display: flex; justify-content: center; gap: 10mm; margin-top: 5mm; padding-top: 3mm; border-top: 1px solid #999; }
     .sig-item { text-align: center; font-size: 3.5mm; }
     .sig-item .label { margin-bottom: 2mm; font-weight: 600; }
     .bottom-info { margin-top: 3mm; text-align: right; font-size: 3.5mm; }
-    .company { margin-top: 5mm; padding-top: 3mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
+    .company { margin-top: 4mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
   </style>
 </head>
 <body>
@@ -226,7 +227,6 @@ export default function CareLogPage() {
     <div class="company">제 천 지 역 자 활 센 터<br>다 사 랑 간 병 공 동 체 (인)</div>
   </div>
 </body>
-</html>`);
 </html>`;
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);

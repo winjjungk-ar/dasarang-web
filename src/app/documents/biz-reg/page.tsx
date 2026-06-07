@@ -25,11 +25,23 @@ export default function BizRegPage() {
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const w = window.open(url, '_blank');
-    if (!w) { window.print(); return; }
-    w.onload = () => {
-      w.print();
+    if (!w || w.closed) {
+      alert('팝업이 차단되었습니다. 현재 페이지에서 인쇄합니다.');
+      const printFrame = document.createElement('iframe');
+      printFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;';
+      printFrame.src = url;
+      document.body.appendChild(printFrame);
+      printFrame.onload = () => {
+        try { printFrame.contentWindow?.print(); } catch(e) { /* ignore */ }
+        setTimeout(() => { document.body.removeChild(printFrame); URL.revokeObjectURL(url); }, 60000);
+      };
+      return;
+    }
+    setTimeout(() => {
+      try { w.print(); } catch(e) { /* ignore */ }
       w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
-    };
+      setTimeout(() => { if (!w.closed) { w.close(); URL.revokeObjectURL(url); } }, 60000);
+    }, 1000);
   };
 
   return (

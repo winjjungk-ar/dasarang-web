@@ -18,8 +18,8 @@ export default function BizRegPage() {
   <style>
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow: hidden; background: white; }
-    img { width: 100%; height: 100%; object-fit: contain; }
+    html, body { display: flex; justify-content: center; align-items: center; margin: 0; padding: 0; background: white; }
+    img { max-width: 190mm; max-height: 287mm; object-fit: contain; }
   </style>
 </head>
 <body>

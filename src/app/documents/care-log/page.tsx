@@ -156,17 +156,16 @@ export default function CareLogPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; height: 297mm;
+      width: 210mm;
       margin: 0; padding: 0;
-      overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
       background: white;
       font-family: 'Noto Serif KR', serif;
     }
     .container {
-      margin: 8mm 12mm;
+      width: 190mm;
       border: 2px solid #333;
       padding: 6mm 8mm;
-      height: calc(297mm - 16mm);
     }
     h3 {
       text-align: center; font-size: 6mm; font-weight: 800;
@@ -174,16 +173,16 @@ export default function CareLogPage() {
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
-      border: 1px solid #999; padding: 2mm 3mm;
-      font-size: 3.5mm; text-align: center; vertical-align: middle;
+      border: 1px solid #999; padding: 2.5mm 3mm;
+      font-size: 3.6mm; text-align: center; vertical-align: middle;
     }
-    th { background: #F0F0F0; font-weight: 600; font-size: 3.2mm; color: #333; }
+    th { background: #F0F0F0; font-weight: 600; font-size: 3.3mm; color: #333; }
     .info-table th { width: 16%; }
-    .signatures { display: flex; justify-content: center; gap: 10mm; margin-top: 5mm; padding-top: 3mm; border-top: 1px solid #999; }
+    .signatures { display: flex; justify-content: center; gap: 10mm; margin: 20mm 0 22mm 0; padding-top: 3mm; border-top: 1px solid #999; }
     .sig-item { text-align: center; font-size: 3.5mm; }
     .sig-item .label { margin-bottom: 2mm; font-weight: 600; }
     .bottom-info { margin-top: 3mm; text-align: right; font-size: 3.5mm; }
-    .company { margin-top: 4mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
+    .company { margin-top: 5mm; padding-top: 3mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
   </style>
 </head>
 <body>

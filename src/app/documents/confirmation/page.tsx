@@ -189,27 +189,28 @@ export default function ConfirmationPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; min-height: 297mm;
+      width: 210mm;
       margin: 0; padding: 0;
       background: white; font-family: sans-serif;
+      display: flex; justify-content: center; align-items: flex-start;
     }
-    .page { padding: 12mm 15mm; width: 210mm; }
-    h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 8mm; color: #111; }
-    .section { border: 1px solid #333; margin-bottom: 4mm; padding: 4mm; }
-    .section-title { font-size: 3.8mm; font-weight: 700; margin-bottom: 2mm; }
+    .container { width: 190mm; padding: 8mm 10mm; }
+    h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 5mm; color: #111; }
+    .section { border: 1px solid #333; margin-bottom: 2mm; padding: 3mm; }
+    .section-title { font-size: 3.8mm; font-weight: 700; margin-bottom: 1.5mm; }
     table { width: 100%; border-collapse: collapse; }
-    td, th { border: 1px solid #555; padding: 2mm 3mm; font-size: 3.5mm; text-align: center; vertical-align: middle; }
+    td, th { border: 1px solid #555; padding: 1.5mm 2mm; font-size: 3.5mm; text-align: center; vertical-align: middle; }
     th { background: #F0F0F0; font-weight: 700; }
-    .confirm { text-align: center; font-size: 4mm; font-weight: 700; margin: 5mm 0; padding: 4mm; border: 1px solid #333; }
-    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8mm; }
+    .confirm { text-align: center; font-size: 4mm; font-weight: 700; margin: 3mm 0; padding: 3mm; border: 1px solid #333; }
+    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 5mm; }
     .sig { text-align: center; flex: 1; font-size: 3.5mm; }
     .sig img { display: block; margin: 0 auto 1mm; }
-    .total { text-align: right; font-size: 4mm; font-weight: 700; color: #4A7C59; margin-top: 2mm; }
-    .bizno { text-align: center; font-weight: 700; font-size: 3.5mm; margin-top: 5mm; }
+    .total { text-align: right; font-size: 4mm; font-weight: 700; color: #4A7C59; margin-top: 1mm; }
+    .bizno { text-align: center; font-weight: 700; font-size: 3.5mm; margin-top: 3mm; }
   </style>
 </head>
 <body>
-  <div class="page">
+  <div class="container">
     <h2>간병인 사용 확인서</h2>
 
     <div class="section">

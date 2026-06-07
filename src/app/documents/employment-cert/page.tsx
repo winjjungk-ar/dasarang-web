@@ -47,25 +47,25 @@ export default function EmploymentCertPage() {
       overflow: hidden;
       background: white;
       font-family: sans-serif;
+      display: flex; align-items: center; justify-content: center;
     }
     .cert {
-      margin: 10mm 12mm;
+      width: 190mm;
       border: 2px solid #333;
-      padding: 8mm 10mm;
-      height: calc(297mm - 20mm);
+      padding: 6mm 8mm;
     }
     h3 {
       text-align: center; font-size: 7mm; font-weight: 800;
-      letter-spacing: 1.5mm; margin-bottom: 8mm; color: #111;
+      letter-spacing: 1.5mm; margin-bottom: 5mm; color: #111;
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
-      border: 1px solid #555; padding: 3mm 4mm;
-      font-size: 3.8mm; text-align: center; vertical-align: middle;
+      border: 1px solid #555; padding: 2.5mm 3mm;
+      font-size: 3.6mm; text-align: center; vertical-align: middle;
     }
-    th { background: #F5F5F5; font-weight: 700; font-size: 3.5mm; color: #333; width: 18%; }
-    .proof { text-align: center; margin: 35mm 0 38mm 0; font-size: 4mm; font-weight: 500; }
-    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10mm; padding-top: 5mm; }
+    th { background: #F5F5F5; font-weight: 700; font-size: 3.3mm; color: #333; width: 18%; }
+    .proof { text-align: center; margin: 20mm 0 22mm 0; font-size: 4mm; font-weight: 500; }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 5mm; padding-top: 3mm; }
     .issuer { text-align: center; flex: 2; }
     .issuer .name { font-weight: 800; font-size: 4.5mm; letter-spacing: 0.5mm; }
     .issuer .sub { font-size: 3.8mm; margin-top: 1mm; }

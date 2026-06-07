@@ -192,7 +192,7 @@ export default function ConfirmationPage() {
       width: 210mm;
       margin: 0; padding: 0;
       background: white; font-family: sans-serif;
-      display: flex; justify-content: center; align-items: flex-start;
+display: flex; justify-content: center; align-items: center; overflow: hidden;
     }
     .container { width: 190mm; padding: 8mm 10mm; }
     h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 5mm; color: #111; }

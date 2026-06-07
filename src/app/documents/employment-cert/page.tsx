@@ -47,7 +47,7 @@ export default function EmploymentCertPage() {
       overflow: hidden;
       background: white;
       font-family: sans-serif;
-      display: flex; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
     }
     .cert {
       width: 190mm;

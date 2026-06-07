@@ -158,7 +158,7 @@ export default function CareLogPage() {
     html, body {
       width: 210mm;
       margin: 0; padding: 0;
-      display: flex; align-items: center; justify-content: center;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
       background: white;
       font-family: 'Noto Serif KR', serif;
     }

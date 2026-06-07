@@ -115,7 +115,7 @@ export default function TransactionCertPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      display: flex; justify-content: center; align-items: center;
+      display: flex; justify-content: center; align-items: center; overflow: hidden;
       margin: 0; padding: 0;
       background: white;
       font-family: sans-serif;

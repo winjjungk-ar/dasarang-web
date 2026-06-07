@@ -189,12 +189,13 @@ export default function ConfirmationPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm;
+      width: 210mm; height: 297mm;
       margin: 0; padding: 0;
-      background: white; font-family: sans-serif;
-display: flex; justify-content: center; align-items: center; overflow: hidden;
+      overflow: hidden;
+      background: white;
+      font-family: sans-serif;
     }
-    .container { width: 190mm; padding: 8mm 10mm; }
+    .container { margin: 10mm 10mm; padding: 8mm 10mm; min-height: calc(297mm - 20mm); }
     h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 5mm; color: #111; }
     .section { border: 1px solid #333; margin-bottom: 2mm; padding: 3mm; }
     .section-title { font-size: 3.8mm; font-weight: 700; margin-bottom: 1.5mm; }

@@ -115,16 +115,17 @@ export default function TransactionCertPage() {
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      display: flex; justify-content: center; align-items: center; overflow: hidden;
+      width: 210mm; height: 297mm;
       margin: 0; padding: 0;
+      overflow: hidden;
       background: white;
       font-family: sans-serif;
     }
     .cert {
-      width: 190mm;
-      margin: 4mm auto;
+      margin: 10mm 10mm;
       border: 2px solid #333;
       padding: 4mm 6mm;
+      min-height: calc(297mm - 20mm);
     }
     h3 {
       text-align: center; font-size: 6mm; font-weight: 800;

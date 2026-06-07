@@ -1,7 +1,41 @@
 'use client';
 
-import { db } from './firebase';
+import { db, ensureAuth } from './firebase';
 import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+
+/** Firebase 연결 상태 진단 */
+export async function checkFirebaseConnection(): Promise<{
+  ok: boolean; authOk: boolean; firestoreOk: boolean;
+  caregiverCount: number; hospitalCount: number; patientCount: number;
+  error?: string; source: 'firestore' | 'localStorage' | 'none';
+}> {
+  const result: { ok: boolean; authOk: boolean; firestoreOk: boolean; caregiverCount: number; hospitalCount: number; patientCount: number; error?: string; source: 'firestore' | 'localStorage' | 'none' } = { ok: false, authOk: false, firestoreOk: false, caregiverCount: 0, hospitalCount: 0, patientCount: 0, source: 'none' };
+  try {
+    result.authOk = await ensureAuth();
+    if (!result.authOk) {
+      result.error = 'Firebase 인증 실패 — 익명 로그인이 차단되었을 수 있습니다';
+      return result;
+    }
+    const snap = await getDocs(collection(db, 'caregivers'));
+    result.firestoreOk = true;
+    result.caregiverCount = snap.size;
+    const hospSnap = await getDocs(collection(db, 'hospitals'));
+    result.hospitalCount = hospSnap.size;
+    const patSnap = await getDocs(collection(db, 'patients'));
+    result.patientCount = patSnap.size;
+    result.source = 'firestore';
+    result.ok = true;
+  } catch (e: any) {
+    result.error = e?.message || String(e);
+    // Check localStorage
+    const cached = getLocal<CaregiverCache>(CG_KEY);
+    if (cached.length > 0) {
+      result.caregiverCount = cached.length;
+      result.source = 'localStorage';
+    }
+  }
+  return result;
+}
 
 export interface Caregiver {
   id: string;
@@ -9,6 +43,16 @@ export interface Caregiver {
   phone: string;
   birth: string;
   regNum: string;
+  position: string;
+  joinDate: string;
+  hourlyRate: number;
+  createdAt: string;
+}
+
+/** localStorage-safe version — PII fields excluded */
+interface CaregiverCache {
+  id: string;
+  name: string;
   position: string;
   joinDate: string;
   hourlyRate: number;
@@ -33,6 +77,15 @@ export interface Patient {
   createdAt: string;
 }
 
+/** localStorage-safe version — PII fields excluded */
+interface PatientCache {
+  id: string;
+  patientName: string;
+  gender: string;
+  hospitalName: string;
+  createdAt: string;
+}
+
 const CG_KEY = 'dasarang_caregivers';
 const HOSP_KEY = 'dasarang_hospitals';
 const PAT_KEY = 'dasarang_patients';
@@ -47,18 +100,30 @@ function setLocal<T>(key: string, data: T[]) {
   localStorage.setItem(key, JSON.stringify(data));
 }
 
+// Strip PII before caching to localStorage
+function cgToCache(cg: Caregiver): CaregiverCache {
+  return { id: cg.id, name: cg.name, position: cg.position, joinDate: cg.joinDate, hourlyRate: cg.hourlyRate, createdAt: cg.createdAt };
+}
+
+function patToCache(p: Patient): PatientCache {
+  return { id: p.id, patientName: p.patientName, gender: p.gender, hospitalName: p.hospitalName, createdAt: p.createdAt };
+}
+
 // ── Caregivers ──
 
 export async function getCaregivers(): Promise<Caregiver[]> {
   if (typeof window === 'undefined') return [];
   try {
+    await ensureAuth();
     const snap = await getDocs(collection(db, 'caregivers'));
     const list: Caregiver[] = [];
     snap.forEach(d => list.push({ id: d.id, ...d.data() } as Caregiver));
-    setLocal(CG_KEY, list); // sync to localStorage cache
-    return list.length > 0 ? list : getLocal<Caregiver>(CG_KEY);
+    setLocal(CG_KEY, list.map(cgToCache)); // cached without PII
+    return list.length > 0 ? list : getLocal<CaregiverCache>(CG_KEY) as unknown as Caregiver[];
   } catch {
-    return getLocal<Caregiver>(CG_KEY);
+    // Firestore offline → fall back to localStorage (PII-stripped cache)
+    const cached = getLocal<CaregiverCache>(CG_KEY);
+    return cached as unknown as Caregiver[];
   }
 }
 
@@ -68,16 +133,16 @@ export async function saveCaregiver(cg: Omit<Caregiver, 'id' | 'createdAt'>): Pr
       ...cg, createdAt: new Date().toISOString(),
     });
     const newCg: Caregiver = { ...cg, id: docRef.id, createdAt: new Date().toISOString() };
-    // also update localStorage
-    const local = getLocal<Caregiver>(CG_KEY);
-    local.push(newCg);
+    const local = getLocal<CaregiverCache>(CG_KEY);
+    local.push(cgToCache(newCg));
     setLocal(CG_KEY, local);
     return newCg;
-  } catch {
-    // Firestore offline → localStorage only
-    const list = getLocal<Caregiver>(CG_KEY);
+  } catch (e: any) {
+    console.error('saveCaregiver failed:', e);
+    // Firestore offline → localStorage only (no PII in cache)
+    const list = getLocal<CaregiverCache>(CG_KEY);
     const newCg: Caregiver = { ...cg, id: Date.now().toString(), createdAt: new Date().toISOString() };
-    list.push(newCg);
+    list.push(cgToCache(newCg));
     setLocal(CG_KEY, list);
     return newCg;
   }
@@ -86,16 +151,16 @@ export async function saveCaregiver(cg: Omit<Caregiver, 'id' | 'createdAt'>): Pr
 export async function updateCaregiver(id: string, data: Partial<Omit<Caregiver, 'id' | 'createdAt'>>) {
   try {
     await updateDoc(doc(db, 'caregivers', id), { ...data });
-  } catch { /* offline — localStorage only below */ }
-  const list = getLocal<Caregiver>(CG_KEY).map(c => c.id === id ? { ...c, ...data } : c);
+  } catch (e: any) { console.error('updateCaregiver failed:', e); }
+  const list = getLocal<CaregiverCache>(CG_KEY).map(c => c.id === id ? { ...c, ...data } as CaregiverCache : c);
   setLocal(CG_KEY, list);
 }
 
 export async function deleteCaregiver(id: string) {
   try {
     await deleteDoc(doc(db, 'caregivers', id));
-  } catch { /* offline */ }
-  const list = getLocal<Caregiver>(CG_KEY).filter(c => c.id !== id);
+  } catch (e: any) { console.error('deleteCaregiver failed:', e); }
+  const list = getLocal<CaregiverCache>(CG_KEY).filter(c => c.id !== id);
   setLocal(CG_KEY, list);
 }
 
@@ -109,6 +174,7 @@ export async function getCaregiverById(id: string): Promise<Caregiver | undefine
 export async function getHospitals(): Promise<Hospital[]> {
   if (typeof window === 'undefined') return [];
   try {
+    await ensureAuth();
     const snap = await getDocs(collection(db, 'hospitals'));
     const list: Hospital[] = [];
     snap.forEach(d => list.push({ id: d.id, ...d.data() } as Hospital));
@@ -141,7 +207,7 @@ export async function saveHospital(h: Omit<Hospital, 'id' | 'createdAt'>): Promi
 export async function updateHospital(id: string, data: Partial<Omit<Hospital, 'id' | 'createdAt'>>) {
   try {
     await updateDoc(doc(db, 'hospitals', id), { ...data });
-  } catch { /* offline */ }
+  } catch (e: any) { console.error('updateHospital failed:', e); }
   const list = getLocal<Hospital>(HOSP_KEY).map(h => h.id === id ? { ...h, ...data } : h);
   setLocal(HOSP_KEY, list);
 }
@@ -149,7 +215,7 @@ export async function updateHospital(id: string, data: Partial<Omit<Hospital, 'i
 export async function deleteHospital(id: string) {
   try {
     await deleteDoc(doc(db, 'hospitals', id));
-  } catch { /* offline */ }
+  } catch (e: any) { console.error('deleteHospital failed:', e); }
   const list = getLocal<Hospital>(HOSP_KEY).filter(h => h.id !== id);
   setLocal(HOSP_KEY, list);
 }
@@ -159,13 +225,17 @@ export async function deleteHospital(id: string) {
 export async function getPatients(): Promise<Patient[]> {
   if (typeof window === 'undefined') return [];
   try {
+    await ensureAuth();
     const snap = await getDocs(collection(db, 'patients'));
     const list: Patient[] = [];
     snap.forEach(d => list.push({ id: d.id, ...d.data() } as Patient));
-    setLocal(PAT_KEY, list);
-    return list.length > 0 ? list : getLocal<Patient>(PAT_KEY);
-  } catch {
-    return getLocal<Patient>(PAT_KEY);
+    setLocal(PAT_KEY, list.map(patToCache)); // cached without PII
+    return list.length > 0 ? list : getLocal<PatientCache>(PAT_KEY) as unknown as Patient[];
+  } catch (e: any) {
+    console.error('getPatients failed:', e);
+    // Firestore offline → fall back to localStorage (PII-stripped cache)
+    const cached = getLocal<PatientCache>(PAT_KEY);
+    return cached as unknown as Patient[];
   }
 }
 
@@ -175,14 +245,14 @@ export async function savePatient(p: Omit<Patient, 'id' | 'createdAt'>): Promise
       ...p, createdAt: new Date().toISOString(),
     });
     const newP: Patient = { ...p, id: docRef.id, createdAt: new Date().toISOString() };
-    const local = getLocal<Patient>(PAT_KEY);
-    local.push(newP);
+    const local = getLocal<PatientCache>(PAT_KEY);
+    local.push(patToCache(newP));
     setLocal(PAT_KEY, local);
     return newP;
   } catch {
-    const list = getLocal<Patient>(PAT_KEY);
+    const list = getLocal<PatientCache>(PAT_KEY);
     const newP: Patient = { ...p, id: Date.now().toString(), createdAt: new Date().toISOString() };
-    list.push(newP);
+    list.push(patToCache(newP));
     setLocal(PAT_KEY, list);
     return newP;
   }
@@ -191,15 +261,15 @@ export async function savePatient(p: Omit<Patient, 'id' | 'createdAt'>): Promise
 export async function updatePatient(id: string, data: Partial<Omit<Patient, 'id' | 'createdAt'>>) {
   try {
     await updateDoc(doc(db, 'patients', id), { ...data });
-  } catch { /* offline */ }
-  const list = getLocal<Patient>(PAT_KEY).map(p => p.id === id ? { ...p, ...data } : p);
+  } catch (e: any) { console.error('updatePatient failed:', e); }
+  const list = getLocal<PatientCache>(PAT_KEY).map(p => p.id === id ? { ...p, ...data } as PatientCache : p);
   setLocal(PAT_KEY, list);
 }
 
 export async function deletePatient(id: string) {
   try {
     await deleteDoc(doc(db, 'patients', id));
-  } catch { /* offline */ }
-  const list = getLocal<Patient>(PAT_KEY).filter(p => p.id !== id);
+  } catch (e: any) { console.error('deletePatient failed:', e); }
+  const list = getLocal<PatientCache>(PAT_KEY).filter(p => p.id !== id);
   setLocal(PAT_KEY, list);
 }

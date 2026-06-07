@@ -3,10 +3,15 @@
 import { useState, useEffect } from 'react';
 import { getCaregivers, saveCaregiver, updateCaregiver, deleteCaregiver, type Caregiver,
          getHospitals, saveHospital, updateHospital, deleteHospital, type Hospital,
-         getPatients, savePatient, updatePatient, deletePatient, type Patient } from '@/lib/caregiverStore';
+         getPatients, savePatient, updatePatient, deletePatient, type Patient,
+         checkFirebaseConnection } from '@/lib/caregiverStore';
 
 export default function CaregiverPage() {
   const [tab, setTab] = useState<'cg' | 'hosp' | 'pat'>('cg');
+  const [error, setError] = useState('');
+  const [offline, setOffline] = useState(false);
+  const [diag, setDiag] = useState<{ ok: boolean; authOk: boolean; firestoreOk: boolean; caregiverCount: number; hospitalCount: number; patientCount: number; error?: string; source: string } | null>(null);
+  const [showDiag, setShowDiag] = useState(false);
 
   // Caregiver
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
@@ -31,15 +36,43 @@ export default function CaregiverPage() {
   const [patGuardianPhone, setPatGuardianPhone] = useState('');
   const [editPatId, setEditPatId] = useState<string | null>(null);
 
-  useEffect(() => { getCaregivers().then(setCaregivers); getHospitals().then(setHospitals); getPatients().then(setPatients); }, []);
+  useEffect(() => {
+    (async () => {
+      // Run diagnostic first
+      const conn = await checkFirebaseConnection();
+      setDiag(conn);
+      if (!conn.ok) setShowDiag(true); // Auto-show diag on failure
+
+      try {
+        const [cgList, hospList, patList] = await Promise.all([
+          getCaregivers(), getHospitals(), getPatients()
+        ]);
+        setCaregivers(cgList);
+        setHospitals(hospList);
+        setPatients(patList);
+        if (cgList.length === 0 && hospList.length === 0 && patList.length === 0) {
+          if (!navigator.onLine) setOffline(true);
+          if (!conn.ok) setError('Firebase 연결 실패 — 아래 진단 정보를 확인해주세요');
+        }
+      } catch (e: any) {
+        setError('데이터를 불러오는 중 오류가 발생했습니다. 인터넷 연결을 확인해주세요.');
+        console.error('Failed to load data:', e);
+      }
+    })();
+  }, []);
 
   // Caregiver actions
   const saveCg = async () => {
     if (!cgName.trim()) return;
-    if (editCgId) await updateCaregiver(editCgId, { name: cgName.trim(), phone: cgPhone.trim(), birth: cgBirth, regNum: cgRegNum.trim(), position: cgPosition, joinDate: cgJoinDate, hourlyRate: Number(cgHourlyRate) || 0 });
-    else await saveCaregiver({ name: cgName.trim(), phone: cgPhone.trim(), birth: cgBirth, regNum: cgRegNum.trim(), position: cgPosition, joinDate: cgJoinDate, hourlyRate: Number(cgHourlyRate) || 0 });
-    setCgName(''); setCgPhone(''); setCgBirth(''); setCgRegNum(''); setCgPosition(''); setCgJoinDate(''); setCgHourlyRate(''); setEditCgId(null);
-    const updated = await getCaregivers(); setCaregivers(updated);
+    try {
+      if (editCgId) await updateCaregiver(editCgId, { name: cgName.trim(), phone: cgPhone.trim(), birth: cgBirth, regNum: cgRegNum.trim(), position: cgPosition, joinDate: cgJoinDate, hourlyRate: Number(cgHourlyRate) || 0 });
+      else await saveCaregiver({ name: cgName.trim(), phone: cgPhone.trim(), birth: cgBirth, regNum: cgRegNum.trim(), position: cgPosition, joinDate: cgJoinDate, hourlyRate: Number(cgHourlyRate) || 0 });
+      setCgName(''); setCgPhone(''); setCgBirth(''); setCgRegNum(''); setCgPosition(''); setCgJoinDate(''); setCgHourlyRate(''); setEditCgId(null); setError('');
+      const updated = await getCaregivers(); setCaregivers(updated);
+    } catch (e: any) {
+      setError('저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      console.error('Save caregiver failed:', e);
+    }
   };
   const editCg = (cg: Caregiver) => { setCgName(cg.name); setCgPhone(cg.phone); setCgBirth(cg.birth); setCgRegNum(cg.regNum || ''); setCgPosition(cg.position || ''); setCgJoinDate(cg.joinDate || ''); setCgHourlyRate(String(cg.hourlyRate || '')); setEditCgId(cg.id); setTab('cg'); };
   const delCg = async (id: string) => { if (confirm('삭제?')) { await deleteCaregiver(id); const updated = await getCaregivers(); setCaregivers(updated); } };
@@ -84,6 +117,39 @@ export default function CaregiverPage() {
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '1rem' }}>
       <h2 style={{ color: '#4A7C59', marginBottom: '1rem' }}>👩‍⚕️ 간병인·병원·환자 관리</h2>
+
+      {error && (
+        <div style={{ padding: '0.75rem 1rem', background: '#FFF3CD', border: '1px solid #FFC107', borderRadius: '0.5rem', color: '#856404', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          ⚠️ {error}
+        </div>
+      )}
+      {offline && !error && (
+        <div style={{ padding: '0.75rem 1rem', background: '#E3F2FD', border: '1px solid #2196F3', borderRadius: '0.5rem', color: '#0D47A1', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          📡 오프라인 모드 — 인터넷 연결 시 데이터가 동기화됩니다
+        </div>
+      )}
+
+      {/* Connection Diagnostic */}
+      <div style={{ marginBottom: '1rem' }}>
+        <button onClick={() => setShowDiag(!showDiag)} style={{ fontSize: '0.75rem', padding: '0.25rem 0.75rem', background: diag?.ok ? '#E8F5E9' : '#FFEBEE', border: '1px solid #ddd', borderRadius: '0.5rem', cursor: 'pointer', color: diag?.ok ? '#2E7D32' : '#C62828' }}>
+          🔧 {diag ? (diag.ok ? '연결 정상' : '연결 오류!') : '진단 중...'} {showDiag ? '▲' : '▼'}
+        </button>
+        {showDiag && diag && (
+          <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#F5F5F5', borderRadius: '0.5rem', fontSize: '0.8125rem', border: '1px solid #E0E0E0' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <tbody>
+                <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888', width: '7rem' }}>Firebase 인증</td><td style={{ fontWeight: 600, color: diag.authOk ? '#2E7D32' : '#C62828' }}>{diag.authOk ? '✅ 성공' : '❌ 실패'}</td></tr>
+                <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888' }}>Firestore 연결</td><td style={{ fontWeight: 600, color: diag.firestoreOk ? '#2E7D32' : '#C62828' }}>{diag.firestoreOk ? '✅ 성공' : '❌ 실패'}</td></tr>
+                <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888' }}>데이터 소스</td><td style={{ fontWeight: 600 }}>{diag.source === 'firestore' ? '☁️ Firestore' : diag.source === 'localStorage' ? '💾 로컬 저장소' : '⚠️ 없음'}</td></tr>
+                <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888' }}>간병인 수</td><td style={{ fontWeight: 600 }}>{diag.caregiverCount}명</td></tr>
+                <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888' }}>병원 수</td><td style={{ fontWeight: 600 }}>{diag.hospitalCount}곳</td></tr>
+                <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888' }}>환자 수</td><td style={{ fontWeight: 600 }}>{diag.patientCount}명</td></tr>
+                {diag.error && <tr><td style={{ padding: '0.25rem 0.5rem', color: '#888' }}>오류</td><td style={{ color: '#C62828', wordBreak: 'break-all' }}>{diag.error}</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>

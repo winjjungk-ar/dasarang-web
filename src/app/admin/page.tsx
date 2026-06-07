@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { db, ensureAuth } from '@/lib/firebase';
 import { collection, query, orderBy, getDocs, doc, updateDoc, deleteDoc, Timestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
@@ -24,8 +24,6 @@ interface Inquiry {
   region?: string;
 }
 
-const ADMIN_PASSWORD='dasarang2024';
-
 const maskName = (name: string) => {
   if (!name || name.length <= 1) return name;
   if (name.length === 2) return name[0] + '*';
@@ -42,16 +40,46 @@ export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loginLoading, setLoginLoading] = useState(false);
   const [tab, setTab] = useState<'all' | 'inquiry' | 'recruit'>('all');
   const [selected, setSelected] = useState<Inquiry | null>(null);
   const [answerText, setAnswerText] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const login = () => {
-    if (password === ADMIN_PASSWORD) {
-      setAuthed(true);
-    } else {
-      toast.error('비밀번호가 틀렸습니다');
+  // Check for existing session
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('admin_auth_v2');
+      if (stored) {
+        const { ts } = JSON.parse(stored);
+        if (Date.now() - ts < 10 * 60 * 1000) {
+          setAuthed(true);
+          return;
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const login = async () => {
+    if (!password) return;
+    setLoginLoading(true);
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        sessionStorage.setItem('admin_auth_v2', JSON.stringify({ ts: Date.now() }));
+        setAuthed(true);
+      } else {
+        toast.error(data.error || '비밀번호가 틀렸습니다');
+      }
+    } catch {
+      toast.error('서버 연결에 실패했습니다');
+    } finally {
+      setLoginLoading(false);
     }
   };
 
@@ -59,11 +87,12 @@ export default function AdminPage() {
     if (!authed) return;
     (async () => {
       try {
+        await ensureAuth();
         const q = query(collection(db, 'inquiries'), orderBy('createdAt', 'desc'));
         const snap = await getDocs(q);
         setInquiries(snap.docs.map(d => ({ id: d.id, ...d.data() } as Inquiry)));
       } catch (err) {
-        console.error(err);
+        console.error('Failed to load inquiries:', err);
       } finally {
         setLoading(false);
       }
@@ -151,17 +180,19 @@ export default function AdminPage() {
             onKeyDown={e => e.key === 'Enter' && login()}
             placeholder="비밀번호"
             autoFocus
+            autoComplete="current-password"
             style={{
               width: '100%', padding: '0.875rem 1rem', borderRadius: '0.75rem',
               border: '1.5px solid #E8D5C4', fontSize: '1.125rem', textAlign: 'center',
               outline: 'none', marginBottom: '1rem', boxSizing: 'border-box',
             }} />
-          <button onClick={login} style={{
-            width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
-            border: 'none', background: '#5B8C5A', color: 'white',
-            fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer',
-          }}>
-            로그인
+          <button onClick={login} disabled={loginLoading}
+            style={{
+              width: '100%', padding: '0.875rem', borderRadius: '0.75rem',
+              border: 'none', background: loginLoading ? '#A0C4A0' : '#5B8C5A', color: 'white',
+              fontWeight: 'bold', fontSize: '1rem', cursor: loginLoading ? 'not-allowed' : 'pointer',
+            }}>
+            {loginLoading ? '확인 중...' : '로그인'}
           </button>
         </div>
       </div>

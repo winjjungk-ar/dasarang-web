@@ -3,18 +3,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-const AUTH_KEY = 'erp_auth_v2';
+const AUTH_KEY = 'erp_auth_v3';
 const AUTH_TTL = 10 * 60 * 1000; // 10분
 
 export default function DocumentsLayout({ children }: { children: React.ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // 10분 세션 체크
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(AUTH_KEY);
+      const stored = sessionStorage.getItem(AUTH_KEY);
       if (stored) {
         const { ts } = JSON.parse(stored);
         if (Date.now() - ts < AUTH_TTL) {
@@ -26,13 +27,27 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
     setAuthenticated(false);
   }, []);
 
-  const handleLogin = () => {
-    if (password === '448282') {
-      localStorage.setItem(AUTH_KEY, JSON.stringify({ ts: Date.now() }));
-      setAuthenticated(true);
-      setError('');
-    } else {
-      setError('비밀번호가 틀렸습니다');
+  const handleLogin = async () => {
+    if (!password) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify({ ts: Date.now() }));
+        setAuthenticated(true);
+      } else {
+        setError(data.error || '비밀번호가 틀렸습니다');
+      }
+    } catch {
+      setError('서버 연결에 실패했습니다');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,8 +57,12 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
         <h2 style={{ color: '#4A7C59', marginBottom: '1rem' }}>🔐 관리자 인증</h2>
         <input type="password" value={password} onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLogin()} placeholder="비밀번호"
+          autoComplete="current-password"
           style={{ width: '100%', padding: '0.75rem', border: '2px solid #4A7C59', borderRadius: '0.5rem', fontSize: '1rem', marginBottom: '0.75rem' }} />
-        <button onClick={handleLogin} style={{ width: '100%', padding: '0.75rem', background: '#4A7C59', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>확인</button>
+        <button onClick={handleLogin} disabled={loading}
+          style={{ width: '100%', padding: '0.75rem', background: loading ? '#999' : '#4A7C59', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: loading ? 'default' : 'pointer' }}>
+          {loading ? '확인 중...' : '확인'}
+        </button>
         {error && <p style={{ color: 'red', marginTop: '0.75rem' }}>{error}</p>}
       </div>
     );
@@ -62,20 +81,6 @@ export default function DocumentsLayout({ children }: { children: React.ReactNod
           ← ERP 메인
         </Link>
       </div>
-      <style dangerouslySetInnerHTML={{ __html: `
-        @page { size: A4 portrait; margin: 0; }
-        @media print {
-          html, body {
-            width: 210mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-          }
-          body { padding: 0 !important; overflow: hidden !important; }
-          nav, footer, header, .no-print { display: none !important; }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        }
-      `}} />
     </>
   );
 }

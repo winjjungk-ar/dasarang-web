@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getCaregivers, type Caregiver } from '@/lib/caregiverStore';
+import { printBlobHtml } from '@/lib/printUtils';
 
 export default function EmploymentCertPage() {
   const [caregiverName, setCaregiverName] = useState('');
@@ -35,36 +36,47 @@ export default function EmploymentCertPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 10mm 12mm; }
+    @page { size: A4; margin: 5mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
       background: white;
       font-family: sans-serif;
+      height: 100%;
     }
     .cert {
       border: 2px solid #333;
-      padding: 6mm 8mm;
+      padding: 8mm 10mm;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     h3 {
       text-align: center; font-size: 6mm; font-weight: 800;
-      letter-spacing: 1.5mm; margin-bottom: 6mm; color: #111;
+      letter-spacing: 1.5mm; margin-bottom: 5mm; color: #111;
     }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; }
     td, th {
-      border: 1px solid #555; padding: 2mm 3mm;
+      border: 1px solid #555; padding: 2.5mm 3mm;
       font-size: 3.5mm; text-align: center; vertical-align: middle;
     }
     th { background: #F5F5F5; font-weight: 700; font-size: 3.2mm; color: #333; width: 18%; }
-    .proof { text-align: center; margin: 25mm 0 28mm 0; font-size: 3.8mm; font-weight: 500; }
-    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8mm; padding-top: 3mm; }
+    .proof {
+      text-align: center;
+      font-size: 3.8mm; font-weight: 500;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 4mm; border-top: 1px solid #e0e0e0; }
     .issuer { text-align: center; flex: 2; }
     .issuer .name { font-weight: 800; font-size: 4mm; letter-spacing: 0.5mm; }
-    .issuer .sub { font-size: 3.5mm; margin-top: 1mm; }
+    .issuer .sub { font-size: 3.5mm; margin-top: 1.5mm; }
     .issuer .reg { font-size: 2.8mm; color: #888; margin-top: 1mm; }
     .date-col { text-align: center; flex: 1; }
     .date-col .label { font-size: 3.2mm; color: #555; }
-    .date-col .val { font-weight: 600; font-size: 3.8mm; margin-top: 1mm; }
+    .date-col .val { font-weight: 600; font-size: 3.8mm; margin-top: 1.5mm; }
     @media print {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -99,31 +111,9 @@ export default function EmploymentCertPage() {
   </div>
 </body>
 </html>`;
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url, '_blank');
-    if (!w || w.closed) {
-      // 팝업이 차단되면 현재 페이지에서 바로 인쇄
-      alert('팝업이 차단되었습니다. 현재 페이지에서 인쇄합니다.');
-      const printFrame = document.createElement('iframe');
-      printFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;';
-      printFrame.src = url;
-      document.body.appendChild(printFrame);
-      printFrame.onload = () => {
-        try { printFrame.contentWindow?.print(); } catch(e) { /* ignore */ }
-        setTimeout(() => { document.body.removeChild(printFrame); URL.revokeObjectURL(url); }, 60000);
-      };
-      return;
-    }
-    // Blob URL은 onload가 불안정 → setTimeout으로 대기 후 인쇄
-    setTimeout(() => {
-      try { w.print(); } catch(e) { /* ignore */ }
-      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
-      // 60초 후 강제 정리
-      setTimeout(() => { if (!w.closed) { w.close(); URL.revokeObjectURL(url); } }, 60000);
-    }, 1000);
-  };
-
+    printBlobHtml(html);
+    return;
+  }; // (replaced by printBlobHtml utility)
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '____년 __월 __일';
     const d = new Date(dateStr + 'T00:00:00');

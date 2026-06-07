@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc as fireDoc } from 'firebase/firestore';
 import { getCaregivers, type Caregiver, getPatients, type Patient } from '@/lib/caregiverStore';
 import SignaturePad from '@/components/SignaturePad';
+import { printBlobHtml } from '@/lib/printUtils';
 
 const TASKS = ['식사보조', '활동보조', '배변보조', '위생보조', '기타'];
 
@@ -149,16 +150,20 @@ export default function CareLogPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 8mm 12mm; }
+    @page { size: A4; margin: 5mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
       background: white;
       font-family: 'Noto Serif KR', serif;
+      height: 100%;
     }
     .container {
       border: 2px solid #333;
       padding: 5mm 7mm;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     h3 {
       text-align: center; font-size: 5.5mm; font-weight: 800;
@@ -228,29 +233,9 @@ export default function CareLogPage() {
   </div>
 </body>
 </html>`;
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url, '_blank');
-    if (!w || w.closed) {
-      alert('팝업이 차단되었습니다. 현재 페이지에서 인쇄합니다.');
-      const printFrame = document.createElement('iframe');
-      printFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;';
-      printFrame.src = url;
-      document.body.appendChild(printFrame);
-      printFrame.onload = () => {
-        try { printFrame.contentWindow?.print(); } catch(e) { /* ignore */ }
-        setTimeout(() => { document.body.removeChild(printFrame); URL.revokeObjectURL(url); }, 60000);
-      };
-      return;
-    }
-    // Blob URL은 onload가 불안정 → setTimeout으로 대기 후 인쇄
-    setTimeout(() => {
-      try { w.print(); } catch(e) { /* ignore */ }
-      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
-      setTimeout(() => { if (!w.closed) { w.close(); URL.revokeObjectURL(url); } }, 60000);
-    }, 1000);
-  };
-
+    printBlobHtml(html);
+    return;
+  }; // (replaced by printBlobHtml utility)
   // ── 저장 함수 ──
   const handleSaveCareLog = async () => {
     if (!patientName) { alert('환자명을 입력해주세요'); return; }

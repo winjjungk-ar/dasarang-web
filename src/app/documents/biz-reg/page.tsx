@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { printBlobHtml } from '@/lib/printUtils';
 
 export default function BizRegPage() {
   const handlePrint = () => {
@@ -26,28 +27,9 @@ export default function BizRegPage() {
   <img src="${window.location.origin}/biz-reg.jpg" alt="사업자등록증"
     onerror="this.style.display='none';document.body.innerHTML='<div style=padding:20mm;text-align:center;color:#999;font-size:5mm>사업자등록증 이미지가 없습니다.<br><br><code>public/biz-reg.jpg</code> 파일을 추가해주세요.</div>'"/>
 </html>`;
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url, '_blank');
-    if (!w || w.closed) {
-      alert('팝업이 차단되었습니다. 현재 페이지에서 인쇄합니다.');
-      const printFrame = document.createElement('iframe');
-      printFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;';
-      printFrame.src = url;
-      document.body.appendChild(printFrame);
-      printFrame.onload = () => {
-        try { printFrame.contentWindow?.print(); } catch(e) { /* ignore */ }
-        setTimeout(() => { document.body.removeChild(printFrame); URL.revokeObjectURL(url); }, 60000);
-      };
-      return;
-    }
-    setTimeout(() => {
-      try { w.print(); } catch(e) { /* ignore */ }
-      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
-      setTimeout(() => { if (!w.closed) { w.close(); URL.revokeObjectURL(url); } }, 60000);
-    }, 1000);
-  };
-
+    printBlobHtml(html);
+    return;
+  }; // (replaced by printBlobHtml utility)
   return (
     <div style={{ maxWidth: '800px', margin: '2rem auto', padding: '1rem' }}>
       <div className="no-print">

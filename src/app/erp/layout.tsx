@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const AUTH_KEY = 'erp_auth_v2';
+const AUTH_KEY = 'erp_auth_v3';
 const AUTH_TTL = 10 * 60 * 1000; // 10분
 
 export default function ERPLayout({ children }: { children: React.ReactNode }) {
@@ -12,11 +12,12 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // 10분 세션 체크
   useEffect(() => {
     try {
-      const stored = localStorage.getItem(AUTH_KEY);
+      const stored = sessionStorage.getItem(AUTH_KEY);
       if (stored) {
         const { ts } = JSON.parse(stored);
         if (Date.now() - ts < AUTH_TTL) {
@@ -28,13 +29,27 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
     setAuthenticated(false);
   }, []);
 
-  const handleLogin = () => {
-    if (password === '448282') {
-      localStorage.setItem(AUTH_KEY, JSON.stringify({ ts: Date.now() }));
-      setAuthenticated(true);
-      setError('');
-    } else {
-      setError('비밀번호가 틀렸습니다');
+  const handleLogin = async () => {
+    if (!password) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        sessionStorage.setItem(AUTH_KEY, JSON.stringify({ ts: Date.now() }));
+        setAuthenticated(true);
+      } else {
+        setError(data.error || '비밀번호가 틀렸습니다');
+      }
+    } catch {
+      setError('서버 연결에 실패했습니다');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,8 +60,12 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
         <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '1.5rem' }}>ERP 시스템은 관리자만 접근할 수 있습니다</p>
         <input type="password" value={password} onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleLogin()} placeholder="비밀번호"
+          autoComplete="current-password"
           style={{ width: '100%', padding: '0.75rem', border: '2px solid #2D5A3D', borderRadius: '0.5rem', fontSize: '1rem', marginBottom: '0.75rem', boxSizing: 'border-box' }} />
-        <button onClick={handleLogin} style={{ width: '100%', padding: '0.75rem', background: '#2D5A3D', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>확인</button>
+        <button onClick={handleLogin} disabled={loading}
+          style={{ width: '100%', padding: '0.75rem', background: loading ? '#999' : '#2D5A3D', color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '1rem', fontWeight: 'bold', cursor: loading ? 'default' : 'pointer' }}>
+          {loading ? '확인 중...' : '확인'}
+        </button>
         {error && <p style={{ color: 'red', marginTop: '0.75rem' }}>{error}</p>}
       </div>
     );

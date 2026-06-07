@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc as fireDoc } from 'firebase/firestore';
 import { getCaregivers, type Caregiver, getHospitals, type Hospital, getPatients, type Patient } from '@/lib/caregiverStore';
 import SignaturePad, { SignaturePrint } from '@/components/SignaturePad';
+import { printBlobHtml } from '@/lib/printUtils';
 
 function TimeSelect({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
@@ -182,20 +183,27 @@ export default function ConfirmationPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 12mm 15mm; }
+    @page { size: A4; margin: 5mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
       background: white; font-family: sans-serif;
+      height: 100%;
     }
-    h2 { text-align: center; font-size: 6.5mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 5mm; color: #111; }
-    .section { border: 1px solid #333; margin-bottom: 3mm; padding: 3mm; page-break-inside: avoid; }
-    .section-title { font-size: 3.5mm; font-weight: 700; margin-bottom: 1.5mm; }
+    .page-wrap {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    h2 { text-align: center; font-size: 6.5mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 4mm; color: #111; }
+    .section { border: 1px solid #333; margin-bottom: 2.5mm; padding: 2.5mm; page-break-inside: avoid; }
+    .section-title { font-size: 3.5mm; font-weight: 700; margin-bottom: 1mm; }
     table { width: 100%; border-collapse: collapse; }
     td, th { border: 1px solid #555; padding: 1.5mm 2mm; font-size: 3.2mm; text-align: center; vertical-align: middle; }
     th { background: #F0F0F0; font-weight: 700; }
-    .confirm { text-align: center; font-size: 3.8mm; font-weight: 700; margin: 4mm 0; padding: 3mm; border: 1px solid #333; page-break-inside: avoid; }
-    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6mm; page-break-inside: avoid; }
+    .confirm { text-align: center; font-size: 3.8mm; font-weight: 700; margin: 3mm 0; padding: 3mm; border: 1px solid #333; page-break-inside: avoid; }
+    .spacer { flex: 1; }
+    .footer { display: flex; justify-content: space-between; align-items: center; padding-top: 4mm; border-top: 1px solid #e0e0e0; page-break-inside: avoid; }
     .sig { text-align: center; flex: 1; font-size: 3.2mm; }
     .sig img { display: block; margin: 0 auto 1mm; max-height: 12mm; }
     .total { text-align: right; font-size: 3.5mm; font-weight: 700; color: #4A7C59; margin-top: 2mm; }
@@ -207,6 +215,7 @@ export default function ConfirmationPage() {
   </style>
 </head>
 <body>
+  <div class="page-wrap">
   <h2>간병인 사용 확인서</h2>
 
   <div class="section">
@@ -243,6 +252,7 @@ export default function ConfirmationPage() {
     ` : ''}
   </div>
 
+  <div class="spacer"></div>
   <div class="confirm">상기와 같이 간병인을 사용하였음을 확인 합니다.</div>
 
   <div class="footer">
@@ -252,30 +262,12 @@ export default function ConfirmationPage() {
   </div>
 
   <div class="bizno">사업자 번호: 141-94-02083 다사랑 간병</div>
+  </div>
 </body>
 </html>`;
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url, '_blank');
-    if (!w || w.closed) {
-      alert('팝업이 차단되었습니다. 현재 페이지에서 인쇄합니다.');
-      const printFrame = document.createElement('iframe');
-      printFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;';
-      printFrame.src = url;
-      document.body.appendChild(printFrame);
-      printFrame.onload = () => {
-        try { printFrame.contentWindow?.print(); } catch(e) { /* ignore */ }
-        setTimeout(() => { document.body.removeChild(printFrame); URL.revokeObjectURL(url); }, 60000);
-      };
-      return;
-    }
-    setTimeout(() => {
-      try { w.print(); } catch(e) { /* ignore */ }
-      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
-      setTimeout(() => { if (!w.closed) { w.close(); URL.revokeObjectURL(url); } }, 60000);
-    }, 1000);
-  };
-
+    printBlobHtml(html);
+    return;
+  }; // (replaced by printBlobHtml utility)
   // ── 저장 함수 ──
   const loadSavedList = async () => {
     try {

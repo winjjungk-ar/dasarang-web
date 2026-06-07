@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { getCaregivers, type Caregiver, getPatients, type Patient } from '@/lib/caregiverStore';
+import { printBlobHtml } from '@/lib/printUtils';
 
 interface Transaction {
   id: string;
@@ -108,16 +109,20 @@ export default function TransactionCertPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 8mm 10mm; }
+    @page { size: A4; margin: 5mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0;
       background: white;
       font-family: sans-serif;
+      height: 100%;
     }
     .cert {
       border: 2px solid #333;
-      padding: 5mm 7mm;
+      padding: 6mm 8mm;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     h3 {
       text-align: center; font-size: 5.5mm; font-weight: 800;
@@ -130,7 +135,8 @@ export default function TransactionCertPage() {
     }
     th { background: #F0F0F0; font-weight: 700; font-size: 2.8mm; color: #333; }
     .info-th { width: 14%; }
-    .footer { text-align: center; margin-top: 5mm; font-size: 3.5mm; font-weight: bold; letter-spacing: 1mm; line-height: 2.2; page-break-inside: avoid; }
+    .content-area { flex: 1; }
+    .footer { text-align: center; margin-top: 5mm; padding-top: 4mm; border-top: 1px solid #e0e0e0; font-size: 3.5mm; font-weight: bold; letter-spacing: 1mm; line-height: 2.2; page-break-inside: avoid; }
     @media print {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -157,6 +163,7 @@ export default function TransactionCertPage() {
       </tr>
     </table>
 
+    <div class="content-area">
     <table style="margin-top:4mm;">
       <thead>
         <tr>
@@ -183,30 +190,12 @@ export default function TransactionCertPage() {
       ${todayStr}<br>
       다 사 랑 간 병 공 동 체 (인)
     </div>
+    </div>
   </div>
 </html>`;
-    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url, '_blank');
-    if (!w || w.closed) {
-      alert('팝업이 차단되었습니다. 현재 페이지에서 인쇄합니다.');
-      const printFrame = document.createElement('iframe');
-      printFrame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:none;z-index:9999;';
-      printFrame.src = url;
-      document.body.appendChild(printFrame);
-      printFrame.onload = () => {
-        try { printFrame.contentWindow?.print(); } catch(e) { /* ignore */ }
-        setTimeout(() => { document.body.removeChild(printFrame); URL.revokeObjectURL(url); }, 60000);
-      };
-      return;
-    }
-    setTimeout(() => {
-      try { w.print(); } catch(e) { /* ignore */ }
-      w.onafterprint = () => { w.close(); URL.revokeObjectURL(url); };
-      setTimeout(() => { if (!w.closed) { w.close(); URL.revokeObjectURL(url); } }, 60000);
-    }, 1000);
-  };
-
+    printBlobHtml(html);
+    return;
+  }; // (replaced by printBlobHtml utility)
   if (loading) return <div style={{ textAlign: 'center', padding: '4rem', color: '#999' }}>⏳ 로딩 중...</div>;
 
   return (

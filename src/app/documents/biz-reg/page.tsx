@@ -14,8 +14,12 @@ export default function BizRegPage() {
   <style>
     @page { size: A4; margin: 0mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow: hidden; background: white; }
-    img { width: 100%; height: 100%; object-fit: contain; }
+    html, body { margin: 0; padding: 0; background: white; }
+    img { width: 210mm; height: 297mm; object-fit: contain; display: block; }
+    @media print {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   </style>
 </head>
 <body>

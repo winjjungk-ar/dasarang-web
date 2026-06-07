@@ -149,37 +149,37 @@ export default function CareLogPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 0mm; }
+    @page { size: A4; margin: 8mm 12mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; height: 297mm;
       margin: 0; padding: 0;
-      overflow: hidden;
       background: white;
       font-family: 'Noto Serif KR', serif;
     }
     .container {
-      margin: 8mm 12mm;
       border: 2px solid #333;
-      padding: 6mm 8mm;
-      height: calc(297mm - 16mm);
+      padding: 5mm 7mm;
     }
     h3 {
-      text-align: center; font-size: 6mm; font-weight: 800;
-      letter-spacing: 0.8mm; margin-bottom: 5mm; color: #111;
+      text-align: center; font-size: 5.5mm; font-weight: 800;
+      letter-spacing: 0.8mm; margin-bottom: 4mm; color: #111;
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
-      border: 1px solid #999; padding: 2mm 3mm;
-      font-size: 3.5mm; text-align: center; vertical-align: middle;
+      border: 1px solid #999; padding: 1.5mm 2mm;
+      font-size: 3.2mm; text-align: center; vertical-align: middle;
     }
-    th { background: #F0F0F0; font-weight: 600; font-size: 3.2mm; color: #333; }
+    th { background: #F0F0F0; font-weight: 600; font-size: 3mm; color: #333; }
     .info-table th { width: 16%; }
-    .signatures { display: flex; justify-content: center; gap: 10mm; margin-top: 5mm; padding-top: 3mm; border-top: 1px solid #999; }
-    .sig-item { text-align: center; font-size: 3.5mm; }
-    .sig-item .label { margin-bottom: 2mm; font-weight: 600; }
-    .bottom-info { margin-top: 3mm; text-align: right; font-size: 3.5mm; }
-    .company { margin-top: 4mm; text-align: center; font-size: 4mm; font-weight: 700; letter-spacing: 0.3mm; }
+    .signatures { display: flex; justify-content: center; gap: 8mm; margin-top: 3mm; padding-top: 2mm; border-top: 1px solid #999; page-break-inside: avoid; }
+    .sig-item { text-align: center; font-size: 3.2mm; }
+    .sig-item .label { margin-bottom: 1.5mm; font-weight: 600; }
+    .bottom-info { margin-top: 2mm; text-align: right; font-size: 3.2mm; }
+    .company { margin-top: 3mm; text-align: center; font-size: 3.5mm; font-weight: 700; letter-spacing: 0.3mm; }
+    @media print {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   </style>
 </head>
 <body>

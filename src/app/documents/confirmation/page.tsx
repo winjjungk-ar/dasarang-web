@@ -182,76 +182,76 @@ export default function ConfirmationPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 0mm; }
+    @page { size: A4; margin: 12mm 15mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; min-height: 297mm;
       margin: 0; padding: 0;
       background: white; font-family: sans-serif;
     }
-    .page { padding: 12mm 15mm; width: 210mm; }
-    h2 { text-align: center; font-size: 7mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 8mm; color: #111; }
-    .section { border: 1px solid #333; margin-bottom: 4mm; padding: 4mm; }
-    .section-title { font-size: 3.8mm; font-weight: 700; margin-bottom: 2mm; }
+    h2 { text-align: center; font-size: 6.5mm; font-weight: 800; letter-spacing: 1mm; margin-bottom: 5mm; color: #111; }
+    .section { border: 1px solid #333; margin-bottom: 3mm; padding: 3mm; page-break-inside: avoid; }
+    .section-title { font-size: 3.5mm; font-weight: 700; margin-bottom: 1.5mm; }
     table { width: 100%; border-collapse: collapse; }
-    td, th { border: 1px solid #555; padding: 2mm 3mm; font-size: 3.5mm; text-align: center; vertical-align: middle; }
+    td, th { border: 1px solid #555; padding: 1.5mm 2mm; font-size: 3.2mm; text-align: center; vertical-align: middle; }
     th { background: #F0F0F0; font-weight: 700; }
-    .confirm { text-align: center; font-size: 4mm; font-weight: 700; margin: 5mm 0; padding: 4mm; border: 1px solid #333; }
-    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 8mm; }
-    .sig { text-align: center; flex: 1; font-size: 3.5mm; }
-    .sig img { display: block; margin: 0 auto 1mm; }
-    .total { text-align: right; font-size: 4mm; font-weight: 700; color: #4A7C59; margin-top: 2mm; }
-    .bizno { text-align: center; font-weight: 700; font-size: 3.5mm; margin-top: 5mm; }
+    .confirm { text-align: center; font-size: 3.8mm; font-weight: 700; margin: 4mm 0; padding: 3mm; border: 1px solid #333; page-break-inside: avoid; }
+    .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 6mm; page-break-inside: avoid; }
+    .sig { text-align: center; flex: 1; font-size: 3.2mm; }
+    .sig img { display: block; margin: 0 auto 1mm; max-height: 12mm; }
+    .total { text-align: right; font-size: 3.5mm; font-weight: 700; color: #4A7C59; margin-top: 2mm; }
+    .bizno { text-align: center; font-weight: 700; font-size: 3.2mm; margin-top: 4mm; }
+    @media print {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   </style>
 </head>
 <body>
-  <div class="page">
-    <h2>간병인 사용 확인서</h2>
+  <h2>간병인 사용 확인서</h2>
 
-    <div class="section">
-      <div class="section-title">1. 피보험자 인적사항 및 간병장소</div>
-      <table><tbody>
-        <tr><th>성명</th><td>${patientName || ''}</td><th>생년월일</th><td>${patientBirth || ''}</td><th>전화번호</th><td>${patientPhone || ''}</td></tr>
-        <tr><th>병원명</th><td colspan="3">${hospital || ''}</td><th>입원기간</th><td>${fmt(admitStart)} ~ ${fmt(admitEnd)}</td></tr>
-      </tbody></table>
-    </div>
-
-    <div class="section">
-      <div class="section-title">2. 간병인 인적사항</div>
-      <table><tbody>
-        <tr><th>성명</th><td>${cg1Name || ''}</td><th>생년월일</th><td>${cg1Birth || ''}</td><th>전화번호</th><td>${cg1Phone || ''}</td></tr>
-        ${cg2Row}
-      </tbody></table>
-    </div>
-
-    <div class="section">
-      <div class="section-title">3. 간병인 소속 간병회사</div>
-      <table><tbody>
-        <tr><th>소속회사명</th><td>다사랑 간병</td><th>전화번호</th><td>01022751946</td><th>간병비</th><td>${careCost || ''}</td></tr>
-      </tbody></table>
-
-      ${timeEntries.length > 0 ? `
-      <table style="margin-top:4mm;">
-        <thead>
-          <tr><th rowspan="2">입원일</th><th colspan="3">간병인 사용시간</th><th colspan="3">간병인 사용시간</th></tr>
-          <tr><th>시작</th><th>종료</th><th>근무</th><th>시작</th><th>종료</th><th>근무</th></tr>
-        </thead>
-        <tbody>${timeRows}</tbody>
-      </table>
-      <div class="total">총 사용시간: ${totalHours}</div>
-      ` : ''}
-    </div>
-
-    <div class="confirm">상기와 같이 간병인을 사용하였음을 확인 합니다.</div>
-
-    <div class="footer">
-      <div class="sig">${sig1Html}</div>
-      <div class="sig">${sig2Block}</div>
-      <div class="sig">작성일자: ${writeDate}</div>
-    </div>
-
-    <div class="bizno">사업자 번호: 141-94-02083 다사랑 간병</div>
+  <div class="section">
+    <div class="section-title">1. 피보험자 인적사항 및 간병장소</div>
+    <table><tbody>
+      <tr><th>성명</th><td>${patientName || ''}</td><th>생년월일</th><td>${patientBirth || ''}</td><th>전화번호</th><td>${patientPhone || ''}</td></tr>
+      <tr><th>병원명</th><td colspan="3">${hospital || ''}</td><th>입원기간</th><td>${fmt(admitStart)} ~ ${fmt(admitEnd)}</td></tr>
+    </tbody></table>
   </div>
+
+  <div class="section">
+    <div class="section-title">2. 간병인 인적사항</div>
+    <table><tbody>
+      <tr><th>성명</th><td>${cg1Name || ''}</td><th>생년월일</th><td>${cg1Birth || ''}</td><th>전화번호</th><td>${cg1Phone || ''}</td></tr>
+      ${cg2Row}
+    </tbody></table>
+  </div>
+
+  <div class="section">
+    <div class="section-title">3. 간병인 소속 간병회사</div>
+    <table><tbody>
+      <tr><th>소속회사명</th><td>다사랑 간병</td><th>전화번호</th><td>01022751946</td><th>간병비</th><td>${careCost || ''}</td></tr>
+    </tbody></table>
+
+    ${timeEntries.length > 0 ? `
+    <table style="margin-top:3mm;">
+      <thead>
+        <tr><th rowspan="2">입원일</th><th colspan="3">간병인 사용시간</th><th colspan="3">간병인 사용시간</th></tr>
+        <tr><th>시작</th><th>종료</th><th>근무</th><th>시작</th><th>종료</th><th>근무</th></tr>
+      </thead>
+      <tbody>${timeRows}</tbody>
+    </table>
+    <div class="total">총 사용시간: ${totalHours}</div>
+    ` : ''}
+  </div>
+
+  <div class="confirm">상기와 같이 간병인을 사용하였음을 확인 합니다.</div>
+
+  <div class="footer">
+    <div class="sig">${sig1Html}</div>
+    <div class="sig">${sig2Block}</div>
+    <div class="sig">작성일자: ${writeDate}</div>
+  </div>
+
+  <div class="bizno">사업자 번호: 141-94-02083 다사랑 간병</div>
 </body>
 </html>`;
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });

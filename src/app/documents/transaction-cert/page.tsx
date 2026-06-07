@@ -108,33 +108,33 @@ export default function TransactionCertPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 0mm; }
+    @page { size: A4; margin: 8mm 10mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; height: 297mm;
       margin: 0; padding: 0;
-      overflow: hidden;
       background: white;
       font-family: sans-serif;
     }
     .cert {
-      margin: 8mm 10mm;
       border: 2px solid #333;
-      padding: 6mm 8mm;
-      height: calc(297mm - 16mm);
+      padding: 5mm 7mm;
     }
     h3 {
-      text-align: center; font-size: 6mm; font-weight: 800;
-      letter-spacing: 3mm; margin-bottom: 5mm; color: #111;
+      text-align: center; font-size: 5.5mm; font-weight: 800;
+      letter-spacing: 3mm; margin-bottom: 4mm; color: #111;
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
-      border: 1px solid #555; padding: 2mm 3mm;
-      font-size: 3.2mm; text-align: center; vertical-align: middle;
+      border: 1px solid #555; padding: 1.5mm 2mm;
+      font-size: 3mm; text-align: center; vertical-align: middle;
     }
-    th { background: #F0F0F0; font-weight: 700; font-size: 3mm; color: #333; }
+    th { background: #F0F0F0; font-weight: 700; font-size: 2.8mm; color: #333; }
     .info-th { width: 14%; }
-    .footer { text-align: center; margin-top: 8mm; font-size: 3.8mm; font-weight: bold; letter-spacing: 1mm; line-height: 2.2; }
+    .footer { text-align: center; margin-top: 5mm; font-size: 3.5mm; font-weight: bold; letter-spacing: 1mm; line-height: 2.2; page-break-inside: avoid; }
+    @media print {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   </style>
 </head>
 <body>

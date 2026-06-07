@@ -35,40 +35,40 @@ export default function EmploymentCertPage() {
   <meta charset="utf-8">
   <title>${docTitle}</title>
   <style>
-    @page { size: A4; margin: 0mm; }
+    @page { size: A4; margin: 10mm 12mm; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
-      width: 210mm; height: 297mm;
       margin: 0; padding: 0;
-      overflow: hidden;
       background: white;
       font-family: sans-serif;
     }
     .cert {
-      margin: 10mm 12mm;
       border: 2px solid #333;
-      padding: 8mm 10mm;
-      height: calc(297mm - 20mm);
+      padding: 6mm 8mm;
     }
     h3 {
-      text-align: center; font-size: 7mm; font-weight: 800;
-      letter-spacing: 1.5mm; margin-bottom: 8mm; color: #111;
+      text-align: center; font-size: 6mm; font-weight: 800;
+      letter-spacing: 1.5mm; margin-bottom: 6mm; color: #111;
     }
     table { width: 100%; border-collapse: collapse; }
     td, th {
-      border: 1px solid #555; padding: 3mm 4mm;
-      font-size: 3.8mm; text-align: center; vertical-align: middle;
+      border: 1px solid #555; padding: 2mm 3mm;
+      font-size: 3.5mm; text-align: center; vertical-align: middle;
     }
-    th { background: #F5F5F5; font-weight: 700; font-size: 3.5mm; color: #333; width: 18%; }
-    .proof { text-align: center; margin: 35mm 0 38mm 0; font-size: 4mm; font-weight: 500; }
-    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10mm; padding-top: 5mm; }
+    th { background: #F5F5F5; font-weight: 700; font-size: 3.2mm; color: #333; width: 18%; }
+    .proof { text-align: center; margin: 25mm 0 28mm 0; font-size: 3.8mm; font-weight: 500; }
+    .footer { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8mm; padding-top: 3mm; }
     .issuer { text-align: center; flex: 2; }
-    .issuer .name { font-weight: 800; font-size: 4.5mm; letter-spacing: 0.5mm; }
-    .issuer .sub { font-size: 3.8mm; margin-top: 1mm; }
-    .issuer .reg { font-size: 3mm; color: #888; margin-top: 1mm; }
+    .issuer .name { font-weight: 800; font-size: 4mm; letter-spacing: 0.5mm; }
+    .issuer .sub { font-size: 3.5mm; margin-top: 1mm; }
+    .issuer .reg { font-size: 2.8mm; color: #888; margin-top: 1mm; }
     .date-col { text-align: center; flex: 1; }
-    .date-col .label { font-size: 3.5mm; color: #555; }
-    .date-col .val { font-weight: 600; font-size: 4mm; margin-top: 1mm; }
+    .date-col .label { font-size: 3.2mm; color: #555; }
+    .date-col .val { font-weight: 600; font-size: 3.8mm; margin-top: 1mm; }
+    @media print {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
   </style>
 </head>
 <body>

@@ -328,7 +328,7 @@ export default function CareLogPage() {
     return dates;
   }, [startDate, endDate]);
 
-  useMemo(() => {
+  useEffect(() => {
     const init: typeof dailyLogs = {};
     dateList.forEach(d => { init[d] = dailyLogs[d] || { startTime: '', endTime: '', tasks: [] }; });
     setDailyLogs(init);

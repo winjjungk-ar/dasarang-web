@@ -74,20 +74,45 @@ async function initPersistence(): Promise<void> {
 /**
  * Anonymous auth gate — call before any Firestore read/write.
  * Ensures persistence is initialized first (handles Android Chrome restrictions).
+ * Includes a 10s timeout to prevent infinite hanging on mobile browsers.
  */
 export async function ensureAuth(): Promise<boolean> {
-  await initPersistence();
+  try {
+    await initPersistence();
+  } catch (e: any) {
+    console.error('[Firebase] Persistence init failed:', e?.message);
+    return false;
+  }
 
   return new Promise<boolean>((resolve) => {
+    let settled = false;
+    const done = (result: boolean) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(result);
+    };
+
+    // 10-second safety timeout — prevents infinite hang on mobile
+    const timer = setTimeout(() => {
+      console.warn('[Firebase] Auth timed out after 10s — falling back to localStorage');
+      done(false);
+    }, 10_000);
+
     const unsub = onAuthStateChanged(auth, (user) => {
       unsub();
-      if (user) return resolve(true);
+      if (user) return done(true);
       signInAnonymously(auth)
-        .then(() => resolve(true))
+        .then(() => done(true))
         .catch((e: any) => {
           console.error('[Firebase] Anonymous sign-in failed:', e?.message, e?.code);
-          resolve(false);
+          done(false);
         });
+    }, (e: any) => {
+      // onAuthStateChanged error callback (Firebase v10+)
+      unsub();
+      console.error('[Firebase] Auth state observer error:', e?.message);
+      done(false);
     });
   });
 }

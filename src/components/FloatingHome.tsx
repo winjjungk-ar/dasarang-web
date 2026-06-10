@@ -4,46 +4,33 @@ export default function FloatingHome() {
   return (
     <div className="no-print" style={{
       position: 'fixed',
-      bottom: '1.5rem',
-      left: '1.5rem',
+      top: '0.75rem',
+      left: '0.75rem',
       zIndex: 9999,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '0.25rem',
     }}>
       <a href="/" style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        width: '3.5rem',
-        height: '3.5rem',
-        borderRadius: '50%',
-        background: '#5B8C5A',
-        color: 'white',
+        gap: '0.375rem',
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(8px)',
+        padding: '0.5rem 0.75rem',
+        borderRadius: '2rem',
+        color: '#4A7C59',
         textDecoration: 'none',
-        fontSize: '1.5rem',
-        boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
-        transition: 'transform 0.2s',
+        fontSize: '0.8125rem',
+        fontWeight: 700,
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        transition: 'transform 0.2s, box-shadow 0.2s',
       }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.05)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)'; }}
         onTouchStart={e => e.currentTarget.style.transform = 'scale(0.95)'}
         onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
       >
-        🏠
-      </a>
-      <span style={{
-        fontSize: '0.6875rem',
-        color: '#6B7280',
-        fontWeight: 600,
-        background: 'rgba(255,255,255,0.85)',
-        padding: '0.25rem 0.5rem',
-        borderRadius: '0.5rem',
-        whiteSpace: 'nowrap',
-      }}>
+        <span style={{ fontSize: '1rem' }}>🏠</span>
         HOME
-      </span>
+      </a>
     </div>
   );
 }

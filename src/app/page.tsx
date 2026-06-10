@@ -494,6 +494,56 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
         </div>
       </section>
 
+      {/* 협력 병원 Section */}
+      <section style={{ padding: '3rem 0', background: '#F8FAF8' }}>
+        <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '0 1rem', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🏥</div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#5B8C5A', marginBottom: '0.75rem' }}>
+            함께하는 의료기관
+          </h2>
+          <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '2rem' }}>
+            믿을 수 있는 협력 병원과 함께합니다
+          </p>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '2rem',
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '1.25rem',
+              padding: '2rem 3rem',
+              boxShadow: '0 3px 16px rgba(139, 119, 90, 0.1)',
+              border: '1px solid #E8F5E9',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.75rem',
+            }}>
+              {/* 제천명지병원 로고 */}
+              <div style={{
+                width: '6rem',
+                height: '6rem',
+                borderRadius: '1rem',
+                background: '#1B3A5C',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2.5rem',
+                color: 'white',
+                fontWeight: 'bold',
+              }}>
+                명지
+              </div>
+              <div style={{ fontWeight: 700, fontSize: '1.125rem', color: '#3D3929' }}>제천명지병원</div>
+              <div style={{ fontSize: '0.8125rem', color: '#9CA3AF' }}>협력 병원</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Service Area Section with Map */}
       <section style={{ padding: '4rem 0', background: 'white' }}>
         <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '0 1rem' }}>

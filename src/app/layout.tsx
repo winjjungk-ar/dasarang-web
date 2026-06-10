@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import ToastProvider from '@/components/ToastProvider';
 import FloatingKakao from '@/components/FloatingKakao';
 import FloatingHome from '@/components/FloatingHome';
+import FloatingPhone from '@/components/FloatingPhone';
 import AuthProvider from '@/components/AuthProvider';
 
 export const viewport: Viewport = {
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main style={{ flex: 1 }}>{children}</main>
         <ToastProvider />
         <FloatingHome />
+        <FloatingPhone />
         <FloatingKakao />
 
         <footer style={{ background: '#4A7C59', color: 'rgba(255,255,255,0.8)' }}>

@@ -10,17 +10,14 @@ export default function FloatingKakao() {
   const handleClick = async () => {
     const kakaoId = 'dasarang';
 
-    // 모바일에서 카카오톡 앱 열기 시도
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
     if (isMobile) {
-      // 카톡 앱 열기 시도 (실패해도 복사는 함)
       try {
         window.location.href = `kakaotalk://plusfriend/home/${kakaoId}`;
       } catch {}
     }
 
-    // 클립보드에 ID 복사
     try {
       await navigator.clipboard.writeText(kakaoId);
       setCopied(true);
@@ -30,7 +27,6 @@ export default function FloatingKakao() {
         setMessage('');
       }, 3000);
     } catch {
-      // 클립보드 실패 시 수동 표시
       setCopied(true);
       setMessage(`카톡 ID: ${kakaoId}`);
       setTimeout(() => {
@@ -49,7 +45,7 @@ export default function FloatingKakao() {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      gap: '0.5rem',
+      gap: '0.25rem',
     }}>
       {/* Tooltip */}
       {(showTooltip || copied) && (
@@ -78,11 +74,11 @@ export default function FloatingKakao() {
       {/* Button */}
       <button
         onClick={handleClick}
-        onMouseEnter={(e) => { setShowTooltip(true); e.currentTarget.style.transform = 'scale(1.1)'; }}
+        onMouseEnter={(e) => { setShowTooltip(true); e.currentTarget.style.transform = 'scale(1.08)'; }}
         onMouseLeave={(e) => { setShowTooltip(false); e.currentTarget.style.transform = 'scale(1)'; }}
         style={{
-          width: '3.5rem',
-          height: '3.5rem',
+          width: '3.75rem',
+          height: '3.75rem',
           borderRadius: '50%',
           background: '#FEE500',
           border: 'none',
@@ -94,6 +90,7 @@ export default function FloatingKakao() {
           fontSize: '1.5rem',
           transition: 'transform 0.2s',
           WebkitTapHighlightColor: 'transparent',
+          position: 'relative',
         }}
         onTouchStart={e => e.currentTarget.style.transform = 'scale(0.95)'}
         onTouchEnd={e => e.currentTarget.style.transform = 'scale(1)'}
@@ -101,17 +98,35 @@ export default function FloatingKakao() {
         💬
       </button>
 
-      {/* Label */}
-      <span style={{
-        fontSize: '0.6875rem',
-        color: '#6B7280',
-        fontWeight: 600,
-        background: 'rgba(255,255,255,0.85)',
-        padding: '0.25rem 0.5rem',
-        borderRadius: '0.5rem',
+      {/* Label with 1분 badge */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '2px',
       }}>
-        카톡 상담
-      </span>
+        <span style={{
+          fontSize: '0.625rem',
+          color: 'white',
+          fontWeight: 700,
+          background: '#DC2626',
+          padding: '1px 6px',
+          borderRadius: '1rem',
+          lineHeight: '1.3',
+        }}>
+          ⚡ 1분 상담
+        </span>
+        <span style={{
+          fontSize: '0.6875rem',
+          color: '#6B7280',
+          fontWeight: 600,
+          background: 'rgba(255,255,255,0.85)',
+          padding: '0.25rem 0.5rem',
+          borderRadius: '0.5rem',
+        }}>
+          카톡 상담
+        </span>
+      </div>
     </div>
   );
 }

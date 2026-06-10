@@ -1,23 +1,9 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { getPasswordHash, signSession, verifySession, COOKIE_NAME, SESSION_TTL } from '@/lib/auth-server';
 
-// Pre-compute hash at module load (cold start, cached per Lambda)
-// Hash of the ERP password — set via ERP_PASSWORD_HASH env var, or computed from ERP_PASSWORD
-const HASH = computeHash();
-
-function computeHash(): string {
-  // Preferred: pre-computed hash in env var (avoids plaintext)
-  if (process.env.ERP_PASSWORD_HASH) {
-    return process.env.ERP_PASSWORD_HASH;
-  }
-  // Fallback: compute from plaintext password (less secure, but still better than client-side)
-  if (process.env.ERP_PASSWORD) {
-    return bcrypt.hashSync(process.env.ERP_PASSWORD, 12);
-  }
-  // Development default — CHANGE IN PRODUCTION
-  // Hash of '448282' — only used when no env var is set
-  return bcrypt.hashSync('448282', 12);
-}
+// Pre-compute hash at module load
+const HASH = getPasswordHash();
 
 // In-memory rate limit: 5 attempts per IP per minute
 const attempts = new Map<string, { count: number; resetAt: number }>();
@@ -52,13 +38,52 @@ export async function POST(request: Request) {
 
     const valid = await bcrypt.compare(password, HASH);
     if (valid) {
-      // Clear rate limit on success
       attempts.delete(ip);
-      return NextResponse.json({ ok: true });
+
+      const tokenPayload = JSON.stringify({ exp: Date.now() + SESSION_TTL });
+      const token = signSession(tokenPayload);
+
+      const response = NextResponse.json({ ok: true });
+      response.cookies.set(COOKIE_NAME, token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: SESSION_TTL / 1000,
+      });
+      return response;
     }
 
     return NextResponse.json({ ok: false, error: '비밀번호가 틀렸습니다.' }, { status: 401 });
   } catch {
     return NextResponse.json({ ok: false, error: '오류가 발생했습니다.' }, { status: 500 });
   }
+}
+
+/** GET: verify existing session */
+export async function GET(request: Request) {
+  const cookie = request.headers.get('cookie') || '';
+  const match = cookie.match(new RegExp(`(?:^|;\\s*)${COOKIE_NAME}=([^;]*)`));
+  const token = match?.[1];
+  if (!token) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
+  const session = verifySession(token);
+  if (!session) {
+    return NextResponse.json({ ok: false }, { status: 401 });
+  }
+  return NextResponse.json({ ok: true, expiresAt: session.exp });
+}
+
+/** DELETE: logout — clear session cookie */
+export async function DELETE() {
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set(COOKIE_NAME, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  });
+  return response;
 }

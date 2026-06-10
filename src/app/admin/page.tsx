@@ -46,18 +46,18 @@ export default function AdminPage() {
   const [answerText, setAnswerText] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Check for existing session
+  // Check for existing server-side session (httpOnly cookie)
   useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem('admin_auth_v2');
-      if (stored) {
-        const { ts } = JSON.parse(stored);
-        if (Date.now() - ts < 10 * 60 * 1000) {
+    (async () => {
+      try {
+        const res = await fetch('/api/auth', { method: 'GET' });
+        const data = await res.json();
+        if (data.ok) {
           setAuthed(true);
-          return;
         }
-      }
-    } catch { /* ignore */ }
+      } catch { /* server unreachable */ }
+      setLoading(false);
+    })();
   }, []);
 
   const login = async () => {
@@ -71,8 +71,8 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        sessionStorage.setItem('admin_auth_v2', JSON.stringify({ ts: Date.now() }));
         setAuthed(true);
+        setPassword('');
       } else {
         toast.error(data.error || '비밀번호가 틀렸습니다');
       }
@@ -81,6 +81,13 @@ export default function AdminPage() {
     } finally {
       setLoginLoading(false);
     }
+  };
+
+  const logout = async () => {
+    await fetch('/api/auth', { method: 'DELETE' });
+    setAuthed(false);
+    setInquiries([]);
+    setSelected(null);
   };
 
   useEffect(() => {
@@ -295,6 +302,7 @@ export default function AdminPage() {
     <div style={{ maxWidth: '56rem', margin: '0 auto', padding: '2rem 1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#4A7C59' }}>📊 관리자 페이지</h1>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '0.375rem', background: '#F0E8D8', borderRadius: '0.75rem', padding: '0.25rem' }}>
           {[
             { key: 'all' as const, label: '전체' },
@@ -311,6 +319,15 @@ export default function AdminPage() {
               {t.label}
             </button>
           ))}
+        </div>
+          <button onClick={logout}
+            style={{
+              padding: '0.5rem 1rem', borderRadius: '0.625rem', border: '1px solid #FCA5A5',
+              background: 'white', color: '#DC2626', fontWeight: 600, fontSize: '0.8125rem',
+              cursor: 'pointer',
+            }}>
+            🚪 로그아웃
+          </button>
         </div>
       </div>
 

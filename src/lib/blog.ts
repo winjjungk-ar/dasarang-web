@@ -1,4 +1,5 @@
 import { marked } from 'marked';
+import sanitizeHtml from 'sanitize-html';
 import blogPosts from '@/lib/blog-posts';
 import type { BlogPostData } from '@/lib/blog-posts';
 
@@ -30,7 +31,15 @@ export function getBlogPost(slug: string): BlogPost | null {
   const post = blogPosts.find((p) => p.slug === slug);
   if (!post) return null;
 
-  const contentHtml = marked(post.markdown, { breaks: true }) as string;
+  const rawHtml = marked(post.markdown, { breaks: true }) as string;
+  const contentHtml = sanitizeHtml(rawHtml, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img', 'h1', 'h2', 'h3']),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      img: ['src', 'alt', 'title', 'width', 'height'],
+      a: ['href', 'target', 'rel'],
+    },
+  });
 
   return { ...post, contentHtml };
 }

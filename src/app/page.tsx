@@ -523,20 +523,15 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
               gap: '0.75rem',
             }}>
               {/* 제천명지병원 로고 */}
-              <div style={{
-                width: '6rem',
-                height: '6rem',
-                borderRadius: '1rem',
-                background: '#1B3A5C',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '2.5rem',
-                color: 'white',
-                fontWeight: 'bold',
-              }}>
-                명지
-              </div>
+              <img
+                src="/hospital-mj.png"
+                alt="제천명지병원"
+                style={{
+                  height: '3rem',
+                  width: 'auto',
+                  objectFit: 'contain',
+                }}
+              />
               <div style={{ fontWeight: 700, fontSize: '1.125rem', color: '#3D3929' }}>제천명지병원</div>
               <div style={{ fontSize: '0.8125rem', color: '#9CA3AF' }}>협력 병원</div>
             </div>

@@ -48,12 +48,15 @@ export interface Caregiver {
   position: string;
   joinDate: string;
   hourlyRate: number;
+  rateHistory?: { rate: number; effectiveDate: string; changedAt: string }[];
   createdAt: string;
 }
 
 export interface Hospital {
   id: string;
   name: string;
+  contractRate?: number;
+  contractNotes?: string;
   createdAt: string;
 }
 
@@ -175,6 +178,20 @@ export async function saveCaregiver(cg: Omit<Caregiver, 'id' | 'createdAt'>): Pr
 export async function updateCaregiver(id: string, data: Partial<Omit<Caregiver, 'id' | 'createdAt'>>) {
   try {
     await ensureAuth();
+    // 시급 변경 시 rateHistory 자동 기록
+    if (data.hourlyRate !== undefined) {
+      const all = await getCaregivers();
+      const current = all.find(c => c.id === id);
+      if (current && current.hourlyRate !== data.hourlyRate) {
+        const history = current.rateHistory || [];
+        history.push({
+          rate: current.hourlyRate,
+          effectiveDate: new Date().toISOString().split('T')[0],
+          changedAt: new Date().toISOString(),
+        });
+        (data as any).rateHistory = history;
+      }
+    }
     await updateDoc(doc(db, 'caregivers', id), { ...data });
   } catch (e: any) { console.error('updateCaregiver Firestore failed:', e?.message); }
   // Update localStorage cache (PII-stripped)

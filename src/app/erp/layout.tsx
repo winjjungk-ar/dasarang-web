@@ -107,6 +107,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
     {
       label: '⚙️ 관리',
       items: [
+        { href: '/erp/contracts', label: '📝 계약·시급' },
         { href: '/erp/accounting', label: '💳 입출금 관리' },
         { href: '/documents/caregivers', label: '간병인·병원·환자 등록' },
         { href: '/documents', label: '서류 발급 홈' },

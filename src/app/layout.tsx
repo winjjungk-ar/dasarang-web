@@ -12,8 +12,54 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
-  description: '다사랑 간병공동체 - 제천지역자활센터',
+  title: {
+    default: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
+    template: '%s - 다사랑 간병',
+  },
+  description:
+    '충북 제천·충주·영월 간병 서비스. 24시간 상주 간병, 식사·위생·활동보조, 투약 관리. 무료 상담으로 맞춤 견적을 받아보세요. 제천지역자활센터 소속 다사랑 간병공동체.',
+  keywords: ['간병', '간병인', '제천간병', '충주간병', '영월간병', '24시간간병', '노인간병', '환자간병', '요양보호사', '다사랑간병'],
+  authors: [{ name: '다사랑 간병공동체' }],
+  creator: '다사랑 간병공동체',
+  metadataBase: new URL('https://www.dasarangcare.co.kr'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: 'https://www.dasarangcare.co.kr',
+    siteName: '다사랑 간병',
+    title: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
+    description:
+      '충북 제천·충주·영월 간병 서비스. 24시간 상주 간병, 무료 상담으로 맞춤 견적을 받아보세요.',
+    images: [
+      {
+        url: '/hero-grandmother.jpg',
+        width: 1200,
+        height: 630,
+        alt: '다사랑 간병 서비스',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '다사랑 간병 - 따뜻한 손길, 정성이 담긴 간병',
+    description:
+      '충북 제천·충주·영월 간병 서비스. 24시간 상주 간병, 무료 상담.',
+    images: ['/hero-grandmother.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   verification: { other: { 'naver-site-verification': '4fefec1c7f3e6bb643de0d9eeadb2f856e8406de' } },
 };
 

@@ -40,10 +40,25 @@ export default function CheckinContent() {
         setTodayRecords(prev => ({ ...prev, [cg.id]: { ...prev[cg.id], clockOut: nowStr } }));
         return `✅ ${cg.name}님 퇴근 완료! (${nowStr}시)`;
       } else {
+        // 오늘 배차 확인 → hospitalName 자동 채우기
+        let hospitalName = '';
+        try {
+          const schedSnap = await getDocs(query(
+            collection(db, 'schedules'),
+            where('caregiverId', '==', cg.id),
+            where('startDate', '<=', today),
+            where('endDate', '>=', today),
+          ));
+          if (!schedSnap.empty) {
+            const sched = schedSnap.docs[0].data();
+            hospitalName = sched.hospitalName || '';
+          }
+        } catch { /* schedule query optional */ }
+
         const docRef = await addDoc(collection(db, 'attendance'), {
           caregiverId: cg.id,
           caregiverName: cg.name,
-          hospitalName: '',
+          hospitalName: hospitalName,
           date: today,
           clockIn: nowStr,
           clockOut: '',
@@ -51,7 +66,7 @@ export default function CheckinContent() {
           createdAt: new Date().toISOString(),
         });
         setTodayRecords(prev => ({ ...prev, [cg.id]: { id: docRef.id, clockIn: nowStr, clockOut: '' } }));
-        return `✅ ${cg.name}님 출근 완료! (${nowStr}시)`;
+        return `✅ ${cg.name}님 출근 완료! (${nowStr}시)${hospitalName ? ` — ${hospitalName}` : ''}`;
       }
     } catch (e) {
       return '오류가 발생했습니다. 다시 시도해주세요.';

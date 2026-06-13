@@ -173,9 +173,18 @@ export default function AttendancePage() {
         {caregivers.length === 0 && <span style={{ color: '#999', fontSize: '0.85rem' }}>등록된 간병인이 없습니다. 먼저 간병인을 등록해주세요.</span>}
       </div>
       {/* QR 체크인 링크 */}
-      <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: '#888' }}>
-        📱 <a href="/checkin" target="_blank" style={{ color: '#2D5A3D', fontWeight: 600 }}>간병인용 체크인 페이지</a> —
-        간병인 핸드폰에서 접속해 출퇴근 버튼 누르면 자동 기록됩니다
+      <div style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: '#888', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <span>
+          📱 <a href="/checkin" target="_blank" style={{ color: '#2D5A3D', fontWeight: 600 }}>간병인용 체크인 페이지</a> —
+          간병인 핸드폰에서 접속해 출퇴근 버튼 누르면 자동 기록됩니다
+        </span>
+        <a href="/checkin/poster" target="_blank" style={{
+          padding: '0.3rem 0.75rem', background: '#FFF9C4', color: '#F57F17',
+          borderRadius: '0.3rem', textDecoration: 'none', fontWeight: 700,
+          fontSize: '0.78rem', whiteSpace: 'nowrap', border: '1px solid #F57F17',
+        }}>
+          🏥 QR 포스터 인쇄
+        </a>
       </div>
     </div>
   );

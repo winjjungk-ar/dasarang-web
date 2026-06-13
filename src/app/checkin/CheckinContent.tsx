@@ -244,6 +244,28 @@ export default function CheckinContent() {
       {/* 링크 모음 */}
       {!targetCg && caregivers.length > 0 && (
         <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid #E0E0E0' }}>
+          {/* 병원 QR 포스터 */}
+          <div style={{ marginBottom: '2rem', padding: '1rem', background: '#FFF9C4', borderRadius: '0.75rem', border: '2px dashed #F57F17' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+              <span style={{ fontSize: '1.5rem' }}>🏥</span>
+              <div>
+                <div style={{ fontWeight: 700, color: '#333', fontSize: '0.95rem' }}>
+                  병원에 붙일 QR 포스터
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#888' }}>
+                  A4 출력 → 간병인실 벽에 붙이기 → 핸드폰 카메라로 찍고 바로 체크인!
+                </div>
+              </div>
+              <a href="/checkin/poster" style={{
+                padding: '0.5rem 1rem', background: '#F57F17', color: 'white',
+                borderRadius: '0.5rem', textDecoration: 'none', fontWeight: 700,
+                fontSize: '0.85rem', whiteSpace: 'nowrap',
+              }}>
+                📱 포스터 만들기
+              </a>
+            </div>
+          </div>
+
           <h3 style={{ textAlign: 'center', color: '#555', marginBottom: '0.5rem', fontSize: '1rem' }}>
             📱 간병인별 자동 체크인 링크
           </h3>

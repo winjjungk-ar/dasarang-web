@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { db } from '@/lib/firebase';
+import { db, ensureAuth } from '@/lib/firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, doc as fireDoc } from 'firebase/firestore';
 import { getCaregivers, type Caregiver, getPatients, type Patient } from '@/lib/caregiverStore';
 import SignaturePad from '@/components/SignaturePad';
@@ -247,6 +247,7 @@ export default function CareLogPage() {
       updatedAt: new Date().toISOString(),
     };
     try {
+      await ensureAuth();
       if (savedCareLogId) {
         await updateDoc(fireDoc(db, 'careLogs', savedCareLogId), data);
       } else {
@@ -254,7 +255,10 @@ export default function CareLogPage() {
         setSavedCareLogId(ref.id);
       }
       alert('저장되었습니다!');
-    } catch { alert('저장 실패'); }
+    } catch (e) {
+      console.error('저장 실패:', e);
+      alert('저장 실패 — ' + ((e as Error)?.message || '알 수 없는 오류'));
+    }
     setSavingCareLog(false);
   };
 

@@ -38,18 +38,32 @@ export default function InvoicePage() {
   useEffect(() => {
     (async () => {
       try {
-        const [cgList, hospList, attSnap, invSnap] = await Promise.all([
+        // Load each dataset independently — one failure shouldn't kill the others
+        const results = await Promise.allSettled([
           getCaregivers(), getHospitals(),
           getDocs(collection(db, 'attendance')),
           getDocs(query(collection(db, 'invoices'), orderBy('createdAt', 'desc'))),
         ]);
-        setCaregivers(cgList); setHospitals(hospList);
-        const alist: Attendance[] = [];
-        attSnap.forEach(d => { const dt = d.data(); alist.push({ id: d.id, ...dt } as Attendance); });
-        setRecords(alist);
-        const ilist: Invoice[] = [];
-        invSnap.forEach(d => { ilist.push({ id: d.id, ...d.data() } as Invoice); });
-        setInvoices(ilist);
+
+        const [cgR, hospR, attR, invR] = results;
+
+        if (cgR.status === 'fulfilled') setCaregivers(cgR.value);
+        else console.error('Caregivers load failed:', cgR.reason?.message);
+
+        if (hospR.status === 'fulfilled') setHospitals(hospR.value);
+        else console.error('Hospitals load failed:', hospR.reason?.message);
+
+        if (attR.status === 'fulfilled') {
+          const alist: Attendance[] = [];
+          attR.value.forEach(d => { const dt = d.data(); alist.push({ id: d.id, ...dt } as Attendance); });
+          setRecords(alist);
+        } else console.error('Attendance load failed:', attR.reason?.message);
+
+        if (invR.status === 'fulfilled') {
+          const ilist: Invoice[] = [];
+          invR.value.forEach(d => { ilist.push({ id: d.id, ...d.data() } as Invoice); });
+          setInvoices(ilist);
+        } else console.error('Invoices load failed:', invR.reason?.message);
       } catch (e) {
         console.error('Invoice page load error:', e);
       } finally {

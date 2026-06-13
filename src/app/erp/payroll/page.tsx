@@ -157,7 +157,7 @@ export default function PayrollPage() {
         />
         <span style={{ fontSize: '0.75rem', color: '#888' }}>원 — Enter로 전체 적용, 아래 표에서 개별 수정</span>
         <div style={{ flex: 1 }} />
-        <button onClick={handleSave} disabled={saving} style={{
+        <button onClick={handleSave} disabled={isViewer || saving} style={{
           padding: '0.5rem 1.25rem', background: saved ? '#4CAF50' : '#2D5A3D',
           color: 'white', border: 'none', borderRadius: '0.5rem', fontSize: '0.875rem',
           fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1,

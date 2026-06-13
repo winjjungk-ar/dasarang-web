@@ -248,7 +248,7 @@ export default function AttendancePage() {
             <span>~</span>
             <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} style={inpSmall} />
             <div style={{ flex: 1 }} />
-            <button onClick={() => { setEditId(null); setForm({ caregiverId: selectedCgId, caregiverName: selectedCg?.name || '', hospitalName: '', date: new Date().toISOString().split('T')[0], clockIn: '09', clockOut: '18' }); setShowModal(true); }} style={btn}>
+            <button onClick={() => { setEditId(null); setForm({ caregiverId: selectedCgId, caregiverName: selectedCg?.name || '', hospitalName: '', date: new Date().toISOString().split('T')[0], clockIn: '09', clockOut: '18' }); setShowModal(true); }} style={btn} disabled={isViewer}>
              ➕ 출퇴근 기록 추가
             </button>
           </div>
@@ -275,8 +275,8 @@ export default function AttendancePage() {
                       <td style={{ ...td2, color: '#C62828', fontWeight: 600 }}>{r.clockOut}시</td>
                       <td style={{ ...td2, fontWeight: 700 }}>{r.totalHours || 0}시간</td>
                       <td style={td2}>
-                        <button onClick={() => handleEdit(r)} style={btnSm}>✏️</button>
-                        <button onClick={() => handleDelete(r.id)} style={{ ...btnSm, background: '#C62828', marginLeft: '4px' }}>🗑️</button>
+                        <button onClick={() => handleEdit(r)} style={btnSm} disabled={isViewer}>✏️</button>
+                        <button onClick={() => handleDelete(r.id)} style={{ ...btnSm, background: '#C62828', marginLeft: '4px' }} disabled={isViewer}>🗑️</button>
                       </td>
                     </tr>
                   ))
@@ -411,9 +411,9 @@ export default function AttendancePage() {
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
-              <button onClick={handleSave} style={{ ...btn, flex: 1 }}>저장</button>
+              <button onClick={handleSave} style={{ ...btn, flex: 1 }} disabled={isViewer || !form.caregiverId || !form.hospitalName || !form.date}>저장</button>
               <button onClick={() => { setShowModal(false); setEditId(null); }} style={{ ...btn, background: '#999', flex: 1 }}>취소</button>
-              {editId && <button onClick={() => { handleDelete(editId); setShowModal(false); setEditId(null); }} style={{ ...btn, background: '#C62828', flex: 1 }}>삭제</button>}
+              {editId && <button onClick={() => { handleDelete(editId); setShowModal(false); setEditId(null); }} style={{ ...btn, background: '#C62828', flex: 1 }} disabled={isViewer}>삭제</button>}
             </div>
           </div>
         </div>

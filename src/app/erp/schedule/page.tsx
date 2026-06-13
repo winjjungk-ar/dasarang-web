@@ -186,7 +186,7 @@ export default function SchedulePage() {
             background: viewMode === m ? '#2D5A3D' : '#E8F0E8', color: viewMode === m ? '#fff' : '#555',
           }}>{m === 'upcoming' ? '📅 예정/진행' : '📋 전체'}</button>
         ))}
-        <button onClick={() => openNew()} style={btnPrimary}>➕ 새 배차</button>
+        <button onClick={() => openNew()} style={btnPrimary} disabled={isViewer}>➕ 새 배차</button>
       </div>
 
       {/* 요약 카드 */}
@@ -257,8 +257,8 @@ export default function SchedulePage() {
                   <td style={{ ...td, color: '#888', fontSize: '0.8rem', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.notes || '-'}</td>
                   <td style={td}>
                     <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-                      <button onClick={() => handleEdit(s)} style={btnSm}>✏️</button>
-                      <button onClick={() => handleDelete(s.id)} style={{ ...btnSm, background: '#C62828' }}>🗑️</button>
+                      <button onClick={() => handleEdit(s)} style={btnSm} disabled={isViewer}>✏️</button>
+                      <button onClick={() => handleDelete(s.id)} style={{ ...btnSm, background: '#C62828' }} disabled={isViewer}>🗑️</button>
                     </div>
                   </td>
                 </tr>
@@ -331,7 +331,7 @@ export default function SchedulePage() {
             </div>
 
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem' }}>
-              <button onClick={handleSave} style={{ ...btnPrimary, flex: 1 }}>저장</button>
+              <button onClick={handleSave} style={{ ...btnPrimary, flex: 1 }} disabled={isViewer || !form.caregiverId || !form.hospitalName || !form.startDate}>저장</button>
               <button onClick={() => { setShowModal(false); setEditId(null); setConflictMsg(''); }} style={{ ...btnPrimary, background: '#999', flex: 1 }}>취소</button>
             </div>
           </div>

@@ -111,10 +111,10 @@ export default function ContractsPage() {
                       ) : <span style={{ color: '#CCC' }}>변경 이력 없음</span>}
                     </td>
                     <td style={td}>
-                      <button onClick={() => handleSaveRate(cg)} disabled={saving === cg.id || Number(editRate[cg.id]) === cg.hourlyRate}
+                      <button onClick={() => handleSaveRate(cg)} disabled={isViewer || saving === cg.id || Number(editRate[cg.id]) === cg.hourlyRate}
                         style={{
-                          ...btnSm, opacity: (saving === cg.id || Number(editRate[cg.id]) === cg.hourlyRate) ? 0.5 : 1,
-                          cursor: (saving === cg.id || Number(editRate[cg.id]) === cg.hourlyRate) ? 'not-allowed' : 'pointer',
+                          ...btnSm, opacity: (isViewer || saving === cg.id || Number(editRate[cg.id]) === cg.hourlyRate) ? 0.5 : 1,
+                          cursor: (isViewer || saving === cg.id || Number(editRate[cg.id]) === cg.hourlyRate) ? 'not-allowed' : 'pointer',
                         }}>{saving === cg.id ? '...' : '💾 저장'}</button>
                     </td>
                   </tr>
@@ -155,7 +155,7 @@ export default function ContractsPage() {
                         style={{ width:'100%', maxWidth:'200px', padding:'0.35rem', border:'1px solid #CCC', borderRadius:'0.25rem', fontSize:'0.8rem' }} />
                     </td>
                     <td style={td}>
-                      <button onClick={() => handleSaveHosp(hosp)} disabled={saving === hosp.id}
+                      <button onClick={() => handleSaveHosp(hosp)} disabled={isViewer || saving === hosp.id}
                         style={{...btnSm, opacity: saving === hosp.id ? 0.5 : 1}}>
                         {saving === hosp.id ? '...' : '💾 저장'}
                       </button>

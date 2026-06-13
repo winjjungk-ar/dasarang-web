@@ -34,6 +34,7 @@ export default function AccountingPage() {
   const [formAmount, setFormAmount] = useState('');
   const [formCategory, setFormCategory] = useState('');
   const [formNote, setFormNote] = useState('');
+  const role = useRole(); const isViewer = role === 'viewer';
 
   useEffect(() => {
     loadTransactions();
@@ -251,8 +252,8 @@ export default function AccountingPage() {
         <select style={sel} value={selMonth} onChange={e => setSelMonth(Number(e.target.value))}>
           {months.map(m => <option key={m} value={m}>{m}월</option>)}
         </select>
-        <button onClick={() => { resetForm(); setShowForm(true); }} style={btnPrimary}>+ 새 내역</button>
-        <label style={{ ...btnPrimary, background: '#1565C0', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+        <button onClick={() => { resetForm(); setShowForm(true); }} style={btnPrimary} disabled={isViewer}>+ 새 내역</button>
+        <label style={{ ...btnPrimary, background: isViewer ? '#999' : '#1565C0', cursor: isViewer ? 'default' : 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', pointerEvents: isViewer ? 'none' : 'auto' }}>
           📂 CSV 가져오기
           <input type="file" accept=".csv" onChange={handleCsvUpload} style={{ display: 'none' }} />
         </label>
@@ -281,7 +282,7 @@ export default function AccountingPage() {
             <span style={{ fontSize: '0.85rem', color: '#555' }}>{csvPreview.length}건 인식됨</span>
             <div style={{ flex: 1 }} />
             <button onClick={() => { setCsvPreview([]); setCsvFileName(''); }} style={btnCancel}>취소</button>
-            <button onClick={handleCsvImport} disabled={csvImporting} style={{ ...btnPrimary, background: csvImporting ? '#999' : '#1565C0' }}>
+            <button onClick={handleCsvImport} disabled={isViewer || csvImporting} style={{ ...btnPrimary, background: csvImporting ? '#999' : '#1565C0' }}>
               {csvImporting ? '⏳ 저장 중...' : `💾 ${csvPreview.length}건 가져오기`}
             </button>
           </div>
@@ -351,7 +352,7 @@ export default function AccountingPage() {
           </div>
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
             <button onClick={() => { setShowForm(false); resetForm(); }} style={btnCancel}>취소</button>
-            <button onClick={handleSubmit} style={btnPrimary}>{editId ? '수정' : '등록'}</button>
+            <button onClick={handleSubmit} style={btnPrimary} disabled={isViewer}>{editId ? '수정' : '등록'}</button>
           </div>
         </div>
       )}
@@ -383,8 +384,8 @@ export default function AccountingPage() {
                   <td style={{ ...td2, color: '#888', fontSize: '0.8rem', maxWidth: '150px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.note || '-'}</td>
                   <td style={td2}>
                     <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-                      <button onClick={() => openEdit(t)} style={btnSm}>✏️</button>
-                      <button onClick={() => handleDelete(t.id)} style={{ ...btnSm, background: '#C62828' }}>🗑️</button>
+                      <button onClick={() => openEdit(t)} style={btnSm} disabled={isViewer}>✏️</button>
+                      <button onClick={() => handleDelete(t.id)} style={{ ...btnSm, background: '#C62828' }} disabled={isViewer}>🗑️</button>
                     </div>
                   </td>
                 </tr>

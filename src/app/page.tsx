@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import CountUp from '@/components/CountUp';
 import ServiceMap from '@/components/ServiceMap';
+import ReviewSection from '@/components/ReviewSection';
 import { getBlogPosts, isNewPost } from '@/lib/blog';
 
 export default function HomePage() {
@@ -423,76 +424,8 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
         </div>
       </section>
 
-      {/* Reviews Section */}
-      <section style={{ padding: '4rem 0', background: 'linear-gradient(180deg, #FEFBF6 0%, #FFF9EE 100%)' }}>
-        <div style={{ maxWidth: '72rem', margin: '0 auto', padding: '0 1rem' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⭐</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#5B8C5A', marginBottom: '0.75rem' }}>
-              보호자분들의 진심
-            </h2>
-            <p style={{ color: '#6B7280', fontSize: '1rem' }}>
-              실제 이용하신 보호자분들의 따뜻한 후기입니다
-            </p>
-          </div>
-
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '1.5rem',
-          }}>
-            {reviews.map((r, i) => (
-              <div key={i} style={{
-                background: 'white',
-                borderRadius: '1.25rem',
-                padding: '2rem',
-                boxShadow: '0 3px 16px rgba(139, 119, 90, 0.08)',
-                border: '1px solid #F0E8D8',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1rem',
-              }}>
-                <div style={{ color: '#F4B400', fontSize: '1.25rem', letterSpacing: '0.1rem' }}>
-                  {'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}
-                </div>
-                <p style={{
-                  color: '#3D3929',
-                  fontSize: '1rem',
-                  lineHeight: 1.7,
-                  fontStyle: 'italic',
-                }}>
-                  "{r.text}"
-                </p>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  borderTop: '1px solid #F0E8D8',
-                  paddingTop: '1rem',
-                }}>
-                  <div style={{
-                    width: '2.75rem',
-                    height: '2.75rem',
-                    borderRadius: '50%',
-                    background: '#E8F5E9',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '1.25rem',
-                    flexShrink: 0,
-                  }}>
-                    {r.avatar}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: 600, color: '#4A7C59', fontSize: '0.9375rem' }}>{r.name}</div>
-                    <div style={{ color: '#9CA3AF', fontSize: '0.8125rem' }}>{r.relation} · {r.region}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Reviews Section — Firebase-powered */}
+      <ReviewSection />
 
       {/* 협력 병원 Section */}
       <section style={{ padding: '3rem 0', background: '#F8FAF8' }}>
@@ -682,31 +615,4 @@ const services = [
   { icon: '🚶', title: '활동보조', desc: '보행, 체위변경, 병실 내 이동을 안전하게 도와드립니다.' },
   { icon: '🚿', title: '위생보조', desc: '세면, 목욕, 구강관리 등 청결한 일상을 유지하도록 돕습니다.' },
   { icon: '💊', title: '투약/건강관리', desc: '정해진 시간에 맞춰 투약을 보조하고 건강 상태를 체크합니다.' },
-];
-
-const reviews = [
-  {
-    stars: 5,
-    text: '어머니 케어가 너무 세심해서 정말 감동했어요. 매일 보고서로 확인하니 안심되고, 간병인 선생님의 진심이 느껴집니다.',
-    name: '김영숙',
-    relation: '보호자 (딸)',
-    region: '충주시',
-    avatar: '👩',
-  },
-  {
-    stars: 5,
-    text: '아버지가 치매로 힘들어하셨는데, 선생님 덕분에 웃음을 되찾으셨어요. 가족보다 더 잘 챙겨주셔서 눈물날 정도로 감사했습니다.',
-    name: '박정호',
-    relation: '보호자 (아들)',
-    region: '제천시',
-    avatar: '👨',
-  },
-  {
-    stars: 5,
-    text: '24시간 믿고 맡길 수 있는 유일한 곳이에요. 응급상황 때도 바로 연락주셔서 얼마나 든든한지 몰라요. 강력 추천합니다.',
-    name: '이미영',
-    relation: '보호자 (딸)',
-    region: '영월군',
-    avatar: '👩‍🦰',
-  },
 ];

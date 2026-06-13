@@ -37,19 +37,24 @@ export default function InvoicePage() {
 
   useEffect(() => {
     (async () => {
-      const [cgList, hospList, attSnap, invSnap] = await Promise.all([
-        getCaregivers(), getHospitals(),
-        getDocs(collection(db, 'attendance')),
-        getDocs(query(collection(db, 'invoices'), orderBy('createdAt', 'desc'))),
-      ]);
-      setCaregivers(cgList); setHospitals(hospList);
-      const alist: Attendance[] = [];
-      attSnap.forEach(d => { const dt = d.data(); alist.push({ id: d.id, ...dt } as Attendance); });
-      setRecords(alist);
-      const ilist: Invoice[] = [];
-      invSnap.forEach(d => { ilist.push({ id: d.id, ...d.data() } as Invoice); });
-      setInvoices(ilist);
-      setLoading(false);
+      try {
+        const [cgList, hospList, attSnap, invSnap] = await Promise.all([
+          getCaregivers(), getHospitals(),
+          getDocs(collection(db, 'attendance')),
+          getDocs(query(collection(db, 'invoices'), orderBy('createdAt', 'desc'))),
+        ]);
+        setCaregivers(cgList); setHospitals(hospList);
+        const alist: Attendance[] = [];
+        attSnap.forEach(d => { const dt = d.data(); alist.push({ id: d.id, ...dt } as Attendance); });
+        setRecords(alist);
+        const ilist: Invoice[] = [];
+        invSnap.forEach(d => { ilist.push({ id: d.id, ...d.data() } as Invoice); });
+        setInvoices(ilist);
+      } catch (e) {
+        console.error('Invoice page load error:', e);
+      } finally {
+        setLoading(false);
+      }
     })();
   }, []);
 

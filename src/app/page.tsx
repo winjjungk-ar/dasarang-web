@@ -164,7 +164,7 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
           }}>
             <CountUp end={2} suffix="년" label="안전 간병 경력" icon="🛡️" color="#E65100" highlight />
             <CountUp end={1200} suffix="+" label="누적 간병 일수" icon="📅" color="#4A7C59" />
-            <CountUp end={100} suffix="%" label="고객 만족도" icon="💚" color="#4A7C59" />
+            <CountUp end={98} suffix="%" label="고객 재의뢰율" icon="💚" color="#4A7C59" />
             <CountUp end={24} prefix="365일 " suffix="시간" label="응급 대응 체계" icon="⏰" color="#5B8C5A" />
           </div>
         </div>

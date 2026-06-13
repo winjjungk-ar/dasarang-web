@@ -135,12 +135,19 @@ function patientToCache(p: Patient): PatientCache {
 export async function getCaregivers(): Promise<Caregiver[]> {
   if (typeof window === 'undefined') return [];
   try {
-    await ensureAuth();
+    const authed = await ensureAuth();
+    if (!authed) {
+      console.warn('[getCaregivers] Auth failed — using localStorage fallback');
+      const cached = getLocal<CaregiverCache>(CG_KEY);
+      return cached.map(c => ({ ...c, phone: '', residentNumber: '' }));
+    }
     const snap = await getDocs(collection(db, 'caregivers'));
     const list: Caregiver[] = [];
     snap.forEach(d => list.push({ id: d.id, ...d.data() } as Caregiver));
-    // Cache only non-PII fields to localStorage
-    setLocal(CG_KEY, list.map(caregiverToCache));
+    // Cache only non-PII fields to localStorage — only if we got data
+    if (list.length > 0) {
+      setLocal(CG_KEY, list.map(caregiverToCache));
+    }
     return list;
   } catch (e: any) {
     console.error('getCaregivers failed:', e?.message);
@@ -225,11 +232,19 @@ export async function getCaregiverById(id: string): Promise<Caregiver | undefine
 export async function getHospitals(): Promise<Hospital[]> {
   if (typeof window === 'undefined') return [];
   try {
-    await ensureAuth();
+    const authed = await ensureAuth();
+    if (!authed) {
+      console.warn('[getHospitals] Auth failed — using localStorage fallback');
+      return getLocal<Hospital>(HOSP_KEY);
+    }
     const snap = await getDocs(collection(db, 'hospitals'));
     const list: Hospital[] = [];
     snap.forEach(d => list.push({ id: d.id, ...d.data() } as Hospital));
-    setLocal(HOSP_KEY, list);
+    // Only overwrite localStorage if we actually got data — prevents empty Firestore
+    // results from destroying the localStorage cache
+    if (list.length > 0) {
+      setLocal(HOSP_KEY, list);
+    }
     return list;
   } catch (e: any) {
     console.error('getHospitals failed:', e?.message);

@@ -75,6 +75,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
     {
       label: '📋 출퇴근',
       items: [
+        { href: '/erp/schedule', label: '📅 배차·스케줄' },
         { href: '/erp/attendance', label: '출퇴근 관리' },
         { href: '/checkin', label: '체크인 (QR)' },
       ],

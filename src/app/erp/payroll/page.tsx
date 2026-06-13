@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, orderBy, updateDoc, doc } from 'firebase/firestore';
 import { getCaregivers, type Caregiver } from '@/lib/caregiverStore';
+import { useRole } from '@/lib/roleContext';
 
 interface Attendance {
   id: string;
@@ -25,6 +26,7 @@ export default function PayrollPage() {
   const [selectedCgId, setSelectedCgId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const role = useRole(); const isViewer = role === 'viewer';
 
   useEffect(() => {
     (async () => {

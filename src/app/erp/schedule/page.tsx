@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy, where } from 'firebase/firestore';
+import { useRole } from '@/lib/roleContext';
 import { getCaregivers, getHospitals, getPatients, type Caregiver, type Hospital, type Patient } from '@/lib/caregiverStore';
 
 interface Schedule {
@@ -47,6 +48,7 @@ export default function SchedulePage() {
     notes: '',
   });
   const [conflictMsg, setConflictMsg] = useState('');
+  const role = useRole(); const isViewer = role === 'viewer';
 
   useEffect(() => {
     (async () => {

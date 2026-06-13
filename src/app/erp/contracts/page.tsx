@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getCaregivers, updateCaregiver, type Caregiver, getHospitals, updateHospital, type Hospital } from '@/lib/caregiverStore';
+import { useRole } from '@/lib/roleContext';
 
 export default function ContractsPage() {
   const [caregivers, setCaregivers] = useState<Caregiver[]>([]);
@@ -16,6 +17,7 @@ export default function ContractsPage() {
   // 병원 계약단가 수정
   const [editHospRate, setEditHospRate] = useState<Record<string, string>>({});
   const [editHospNotes, setEditHospNotes] = useState<Record<string, string>>({});
+  const role = useRole(); const isViewer = role === 'viewer';
 
   useEffect(() => {
     (async () => {

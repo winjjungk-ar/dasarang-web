@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { getCaregivers, type Caregiver, getHospitals, type Hospital } from '@/lib/caregiverStore';
+import { useRole } from '@/lib/roleContext';
 
 interface Attendance {
   id: string; caregiverId: string; caregiverName: string;
@@ -34,6 +35,7 @@ export default function InvoicePage() {
   const [selMonth, setSelMonth] = useState(new Date().getMonth() + 1);
   const [selHospital, setSelHospital] = useState('');
   const [generatedInvoice, setGeneratedInvoice] = useState<Invoice | null>(null);
+  const role = useRole(); const isViewer = role === 'viewer';
 
   useEffect(() => {
     (async () => {
@@ -198,7 +200,7 @@ export default function InvoicePage() {
               placeholder="병원명 직접 입력"
               style={{ padding:'0.4rem 0.6rem', border:'1px solid #CCC', borderRadius:'0.4rem', fontSize:'0.85rem', minWidth:'150px' }} />
           )}
-          <button onClick={handleGenerate} style={btnPrimary}>📊 청구서 생성</button>
+          <button onClick={handleGenerate} style={btnPrimary} disabled={isViewer}>📊 청구서 생성</button>
         </div>
       </div>
 
@@ -207,7 +209,7 @@ export default function InvoicePage() {
         <div style={{ marginBottom: '2rem', padding: '1.5rem', background: 'white', borderRadius: '0.75rem', border: '2px solid #2D5A3D' }} className="invoice">
           <div className="no-print" style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', marginBottom: '1rem' }}>
             <button onClick={() => setGeneratedInvoice(null)} style={btnCancel}>취소</button>
-            <button onClick={handleSave} style={btnPrimary}>💾 청구서 저장</button>
+            <button onClick={handleSave} style={btnPrimary} disabled={isViewer}>💾 청구서 저장</button>
             <button onClick={() => window.print()} style={{...btnPrimary, background:'#4A7C59'}}>🖨️ 인쇄</button>
           </div>
 
@@ -286,15 +288,15 @@ export default function InvoicePage() {
                   <td style={td}>
                     <div style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                       {inv.status === 'draft' && (
-                        <button onClick={() => handleStatus(inv.id, 'sent')} style={btnSm}>📤 발송</button>
+                        <button onClick={() => handleStatus(inv.id, 'sent')} style={btnSm} disabled={isViewer}>📤 발송</button>
                       )}
                       {inv.status === 'sent' && (
-                        <button onClick={() => handleStatus(inv.id, 'paid')} style={{...btnSm, background:'#2D5A3D'}}>✅ 입금</button>
+                        <button onClick={() => handleStatus(inv.id, 'paid')} style={{...btnSm, background:'#2D5A3D'}} disabled={isViewer}>✅ 입금</button>
                       )}
                       {inv.status !== 'paid' && inv.status !== 'sent' && (
-                        <button onClick={() => handleStatus(inv.id, 'paid')} style={{...btnSm, background:'#2D5A3D'}}>✅ 입금</button>
+                        <button onClick={() => handleStatus(inv.id, 'paid')} style={{...btnSm, background:'#2D5A3D'}} disabled={isViewer}>✅ 입금</button>
                       )}
-                      <button onClick={() => handleDelete(inv.id)} style={{...btnSm, background:'#C62828'}}>🗑️</button>
+                      <button onClick={() => handleDelete(inv.id)} style={{...btnSm, background:'#C62828'}} disabled={isViewer}>🗑️</button>
                     </div>
                   </td>
                 </tr>

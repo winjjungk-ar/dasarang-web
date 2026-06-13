@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { getCaregivers, getHospitals, type Caregiver, type Hospital } from '@/lib/caregiverStore';
+import { useRole } from '@/lib/roleContext';
 
 interface Attendance {
   id: string;
@@ -43,6 +44,7 @@ export default function AttendancePage() {
   const [statsYear, setStatsYear] = useState(new Date().getFullYear());
   const [statsMonth, setStatsMonth] = useState(new Date().getMonth() + 1);
   const [statsQuarter, setStatsQuarter] = useState(Math.ceil((new Date().getMonth() + 1) / 3));
+  const role = useRole(); const isViewer = role === 'viewer';
 
   // 데이터 로드
   const loadData = async () => {

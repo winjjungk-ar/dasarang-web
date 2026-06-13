@@ -76,8 +76,20 @@ export default function InvoicePage() {
   const handleGenerate = () => {
     if (!selHospital) { alert('병원을 선택해주세요'); return; }
     const monthPrefix = `${selYear}-${String(selMonth).padStart(2, '0')}`;
+    console.log('[Invoice] Generate:', { selHospital, monthPrefix, totalRecords: records.length, sampleDates: records.slice(0,3).map(r=>r.date), sampleHospitals: [...new Set(records.map(r=>r.hospitalName))] });
     const filtered = records.filter(r => r.date.startsWith(monthPrefix) && r.hospitalName === selHospital);
-    if (filtered.length === 0) { alert(`${selHospital}의 ${selYear}년 ${selMonth}월 출퇴근 기록이 없습니다`); return; }
+    console.log('[Invoice] Filtered:', filtered.length);
+    if (filtered.length === 0) {
+      // Show what IS available to help debugging
+      const availableMonths = [...new Set(records.filter(r => r.hospitalName === selHospital).map(r => r.date?.substring(0,7)))].sort();
+      const availableHospitals = [...new Set(records.map(r => r.hospitalName).filter(Boolean))].sort();
+      let msg = `${selHospital}의 ${selYear}년 ${selMonth}월 출퇴근 기록이 없습니다.`;
+      if (availableMonths.length > 0) msg += `\n\n${selHospital} 기록 있는 월: ${availableMonths.join(', ')}`;
+      else if (availableHospitals.length > 0) msg += `\n\n기록 있는 병원: ${availableHospitals.join(', ')}`;
+      else msg += `\n\n출퇴근 기록이 아직 없습니다. 먼저 /checkin 또는 출퇴근 관리에서 기록을 추가해주세요.`;
+      alert(msg);
+      return;
+    }
 
     const cgRateMap: Record<string, number> = {};
     caregivers.forEach(c => { cgRateMap[c.id] = c.hourlyRate || 0; });

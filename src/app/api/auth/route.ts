@@ -36,22 +36,36 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: '비밀번호를 입력해주세요.' }, { status: 400 });
     }
 
-    const valid = await bcrypt.compare(password, HASH);
-    if (valid) {
+    // 관리자 비밀번호 확인
+    const adminValid = await bcrypt.compare(password, HASH);
+    if (adminValid) {
       attempts.delete(ip);
-
-      const tokenPayload = JSON.stringify({ exp: Date.now() + SESSION_TTL });
+      const tokenPayload = JSON.stringify({ exp: Date.now() + SESSION_TTL, role: 'admin' });
       const token = signSession(tokenPayload);
-
-      const response = NextResponse.json({ ok: true });
+      const response = NextResponse.json({ ok: true, role: 'admin' });
       response.cookies.set(COOKIE_NAME, token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: SESSION_TTL / 1000,
+        httpOnly: true, secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax', path: '/', maxAge: SESSION_TTL / 1000,
       });
       return response;
+    }
+
+    // 조회전용 비밀번호 확인
+    const viewerHash = process.env.ERP_VIEWER_PASSWORD_HASH
+      || (process.env.ERP_VIEWER_PASSWORD ? bcrypt.hashSync(process.env.ERP_VIEWER_PASSWORD, 12) : '');
+    if (viewerHash) {
+      const viewerValid = await bcrypt.compare(password, viewerHash);
+      if (viewerValid) {
+        attempts.delete(ip);
+        const tokenPayload = JSON.stringify({ exp: Date.now() + SESSION_TTL, role: 'viewer' });
+        const token = signSession(tokenPayload);
+        const response = NextResponse.json({ ok: true, role: 'viewer' });
+        response.cookies.set(COOKIE_NAME, token, {
+          httpOnly: true, secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax', path: '/', maxAge: SESSION_TTL / 1000,
+        });
+        return response;
+      }
     }
 
     return NextResponse.json({ ok: false, error: '비밀번호가 틀렸습니다.' }, { status: 401 });

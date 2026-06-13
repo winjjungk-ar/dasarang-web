@@ -162,7 +162,7 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
             gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
             gap: '1.25rem',
           }}>
-            <CountUp end={2} suffix="년" label="무사고 간병 경력" icon="🛡️" color="#E65100" highlight />
+            <CountUp end={2} suffix="년" label="안전 간병 경력" icon="🛡️" color="#E65100" highlight />
             <CountUp end={1200} suffix="+" label="누적 간병 일수" icon="📅" color="#4A7C59" />
             <CountUp end={100} suffix="%" label="고객 만족도" icon="💚" color="#4A7C59" />
             <CountUp end={24} prefix="365일 " suffix="시간" label="응급 대응 체계" icon="⏰" color="#5B8C5A" />
@@ -551,7 +551,7 @@ const currentSeason = seasonData[season as keyof typeof seasonData];
             gap: '1.25rem',
           }}>
             {[
-              { href: '/about', icon: '🌿', title: '회사 소개', desc: '무사고 2년, 고객만족 100%', badge: '🏆 신뢰', bg: '#E8F5E9', color: '#4A7C59' },
+              { href: '/about', icon: '🌿', title: '회사 소개', desc: '안전 간병, 높은 만족도', badge: '🏆 신뢰', bg: '#E8F5E9', color: '#4A7C59' },
               { href: '/documents', icon: '📂', title: '서류 발급', desc: '간병일지·확인서·증명서 발급', badge: '📋 업무', bg: '#FFF3E0', color: '#E65100' },
               { href: '/notice', icon: '📢', title: '공지사항', desc: '새로운 소식과 이벤트', badge: '📌 알림', bg: '#F0F7F0', color: '#5B8C5A' },
               { href: '/blog', icon: '📝', title: '간병 정보', desc: '유용한 정보와 최신 가이드', badge: '📰 정보', bg: '#FFF8E1', color: '#F57C00' },

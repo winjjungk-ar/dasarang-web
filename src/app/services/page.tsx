@@ -110,7 +110,7 @@ export default function ServicesPage() {
             color: '#4A7C59',
             marginBottom: '1rem',
           }}>
-            타사와 다른 이유
+            다사랑의 특징
           </h2>
           <p style={{ color: '#6B7280', fontSize: '1.125rem', maxWidth: '36rem', margin: '0 auto' }}>
             실제 간병 서비스 이용자들의 불만을 분석하여 만들었습니다
@@ -305,7 +305,7 @@ const differentiators = [
   },
   {
     icon: '🎓',
-    title: '검증된 간병인',
+    title: '전문 간병인',
     solves: '"간병인 태도가 너무 불성실해요"',
     desc: '모든 간병인은 40시간 전문교육 이수 + 인성검증 + 범죄이력 조회를 통과한 분들만 배정합니다. 정기적인 서비스 평가로 품질을 유지합니다.',
   },
@@ -332,6 +332,6 @@ const differentiators = [
 const steps = [
   { title: '무료 상담', desc: '환자 상태와 필요 서비스를 상세히 파악합니다' },
   { title: '맞춤 견적', desc: '투명한 비용으로 맞춤형 플랜을 제안합니다' },
-  { title: '간병인 매칭', desc: '검증된 간병인 중 최적의 인력을 배정합니다' },
+  { title: '간병인 매칭', desc: '전문 간병인 중 최적의 인력을 배정합니다' },
   { title: '간병 시작', desc: '실시간 보고서와 함께 체계적인 간병이 시작됩니다' },
 ];

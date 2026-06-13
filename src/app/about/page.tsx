@@ -42,7 +42,7 @@ export default function AboutPage() {
       }}>
         {[
           { num: '2년', label: '간병 서비스 경력', icon: '📅', color: '#4A7C59' },
-          { num: '무사고', label: '단 한 건의 사고도 없이', icon: '🛡️', color: '#E65100', big: true },
+          { num: '안전', label: '단 한 건의 사고도 없이', icon: '🛡️', color: '#E65100', big: true },
           { num: '100%', label: '고객 만족 응답', icon: '💚', color: '#4A7C59' },
           { num: '24시간', label: '365일 응급 대응', icon: '⏰', color: '#5B8C5A' },
         ].map((stat) => (
@@ -125,7 +125,7 @@ export default function AboutPage() {
           gap: '1rem',
           flexWrap: 'wrap',
         }}>
-          {['🛡️ 안전 최우선', '💚 정성 간병', '🤝 투명한 소통', '🏆 검증된 전문성'].map(tag => (
+          {['🛡️ 안전 최우선', '💚 정성 간병', '🤝 투명한 소통', '🎓 전문 교육 이수'].map(tag => (
             <span key={tag} style={{
               background: 'white',
               padding: '0.625rem 1.25rem',
@@ -252,7 +252,7 @@ export default function AboutPage() {
             { label: '사업자번호', value: '141-94-02083' },
             { label: '서비스 지역', value: '충주시 · 제천시 · 영월군' },
             { label: '운영 기간', value: '2024년 ~ 현재 (2년)' },
-            { label: '안전 기록', value: '🛡️ 무사고 2년' },
+            { label: '안전 기록', value: '🛡️ 안전 간병 2년' },
           ].map(info => (
             <div key={info.label} style={{
               display: 'flex',

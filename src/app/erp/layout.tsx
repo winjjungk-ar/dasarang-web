@@ -1,16 +1,12 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { RoleContext, type Role } from '@/lib/roleContext';
 
 const AUTH_KEY = 'erp_auth_v3';
 const AUTH_TTL = 10 * 60 * 1000; // 10분
-
-type Role = 'admin' | 'viewer';
-
-export const RoleContext = createContext<Role>('viewer');
-export const useRole = () => useContext(RoleContext);
 
 export default function ERPLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

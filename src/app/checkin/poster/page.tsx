@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 
 export default function CheckinPosterPage() {
   const [origin, setOrigin] = useState('');
   const [hospital, setHospital] = useState('');
   const [showPoster, setShowPoster] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState('');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -13,8 +15,20 @@ export default function CheckinPosterPage() {
     }
   }, []);
 
-  const checkinUrl = `${origin}/checkin`;
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&color=2D5A3D&data=${encodeURIComponent(checkinUrl)}`;
+  const handlePreview = async () => {
+    setShowPoster(true);
+    const checkinUrl = `${window.location.origin}/checkin`;
+    try {
+      const dataUrl = await QRCode.toDataURL(checkinUrl, {
+        width: 400,
+        margin: 2,
+        color: { dark: '#2D5A3D', light: '#FFFFFF' },
+      });
+      setQrDataUrl(dataUrl);
+    } catch {
+      setQrDataUrl('');
+    }
+  };
 
   if (!showPoster) {
     return (
@@ -52,7 +66,7 @@ export default function CheckinPosterPage() {
         </div>
 
         <button
-          onClick={() => setShowPoster(true)}
+          onClick={handlePreview}
           style={{
             width: '100%', padding: '1rem',
             background: '#2D5A3D', color: 'white',
@@ -108,11 +122,21 @@ export default function CheckinPosterPage() {
           borderRadius: '3mm', padding: '5mm',
           background: 'white',
         }}>
-          <img
-            src={qrUrl}
-            alt="QR 체크인"
-            style={{ width: '90mm', height: '90mm', display: 'block' }}
-          />
+          {qrDataUrl ? (
+            <img
+              src={qrDataUrl}
+              alt="QR 체크인"
+              style={{ width: '90mm', height: '90mm', display: 'block' }}
+            />
+          ) : (
+            <div style={{
+              width: '90mm', height: '90mm',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#F5F5F5', color: '#999', fontSize: '1rem',
+            }}>
+              QR 생성 중...
+            </div>
+          )}
         </div>
 
         {/* 안내문 */}
@@ -152,7 +176,7 @@ export default function CheckinPosterPage() {
         display: 'flex', gap: '0.75rem',
       }}>
         <button
-          onClick={() => setShowPoster(false)}
+          onClick={() => { setShowPoster(false); setQrDataUrl(''); }}
           style={{
             padding: '0.75rem 1.5rem',
             background: '#EEE', color: '#555',

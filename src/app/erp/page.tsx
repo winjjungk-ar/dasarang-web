@@ -33,6 +33,7 @@ export default function ERPDashboard() {
   const modules = [
     { href: '/erp/schedule', icon: '📋', title: '배차·스케줄', desc: '간병인 배정 / 일정 관리', color: '#D84315', stat: `${todayCount}건`, statLabel: '오늘 출퇴근' },
     { href: '/erp/attendance', icon: '⏱️', title: '출퇴근 관리', desc: '간병인 출퇴근 기록 / 통계', color: '#2D5A3D', stat: `${cgCount}명`, statLabel: '등록 간병인' },
+    { href: '/erp/invoice', icon: '🧾', title: '병원별 청구서', desc: '월간 간병비 자동 계산', color: '#1565C0', stat: '발행', statLabel: '청구서' },
     { href: '/checkin', icon: '📱', title: '체크인 (QR)', desc: '간병인 핸드폰 출퇴근', color: '#1565C0', stat: '바로가기', statLabel: 'QR 스캔' },
     { href: '/documents/employment-cert', icon: '📜', title: '재직증명서', desc: '재직증명서 발급', color: '#6A1B9A', stat: '발급', statLabel: '문서 출력' },
     { href: '/documents/care-log', icon: '📋', title: '간병일지', desc: '일일 간병 기록', color: '#E65100', stat: '작성', statLabel: '일지 작성' },

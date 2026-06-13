@@ -83,6 +83,7 @@ export default function ERPLayout({ children }: { children: React.ReactNode }) {
     {
       label: '📊 리포트',
       items: [
+        { href: '/erp/invoice', label: '🧾 병원별 청구서' },
         { href: '/erp/report', label: '병원별 매출' },
         { href: '/erp/payroll', label: '💰 급여 정산' },
       ],

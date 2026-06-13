@@ -164,9 +164,14 @@ export default function InvoicePage() {
           </select>
           <select style={{...selStyle, minWidth:'180px'}} value={selHospital} onChange={e => setSelHospital(e.target.value)}>
             <option value="">병원 선택</option>
-            {hospitalNames.map(h => <option key={h} value={h}>{h}</option>)}
-            {hospitals.map(h => !hospitalNames.includes(h.name) && <option key={h.id} value={h.name}>{h.name} (미사용)</option>)}
+            {hospitals.map(h => <option key={h.id} value={h.name}>{h.name}</option>)}
+            {hospitalNames.filter(h => !hospitals.find(x => x.name === h)).map(h => <option key={h} value={h}>{h} (기록有)</option>)}
           </select>
+          {hospitals.length === 0 && hospitalNames.length === 0 && (
+            <input type="text" value={selHospital} onChange={e => setSelHospital(e.target.value)}
+              placeholder="병원명 직접 입력"
+              style={{ padding:'0.4rem 0.6rem', border:'1px solid #CCC', borderRadius:'0.4rem', fontSize:'0.85rem', minWidth:'150px' }} />
+          )}
           <button onClick={handleGenerate} style={btnPrimary}>📊 청구서 생성</button>
         </div>
       </div>

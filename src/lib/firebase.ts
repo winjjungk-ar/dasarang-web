@@ -37,7 +37,8 @@ export const auth = app ? getAuth(app) : dummyAuth;
 export const db = app ? getFirestore(app) : dummyDb;
 export default app;
 
-// Persistence state
+// Persistence state — use sessionStorage to dedupe across module reloads (Next.js hot reload / chunk splitting)
+const PERSISTENCE_KEY = '_fb_persist_done';
 let authReady = false;
 let initPromise: Promise<void> | null = null;
 
@@ -45,27 +46,42 @@ let initPromise: Promise<void> | null = null;
  * Initialize Firebase Auth with best-available persistence.
  * Falls back: LocalStorage → SessionStorage → InMemory.
  * This is critical for Android Chrome where IndexedDB may be restricted.
+ *
+ * Uses sessionStorage + module-level flags to guarantee single initialization
+ * even when Next.js splits this module across multiple chunks.
  */
 async function initPersistence(): Promise<void> {
+  // Already resolved in this module instance
   if (authReady) return;
+  // Already in progress in this module instance
   if (initPromise) return initPromise;
+  // Already done in another module instance (session-wide dedup)
+  try {
+    if (typeof sessionStorage !== 'undefined' && sessionStorage.getItem(PERSISTENCE_KEY) === '1') {
+      authReady = true;
+      return;
+    }
+  } catch { /* sandboxed iframe may block sessionStorage */ }
 
   initPromise = (async () => {
+    let persistenceUsed = '';
     try {
       await setPersistence(auth, browserLocalPersistence);
-      console.log('[Firebase] Using local persistence');
+      persistenceUsed = 'local';
     } catch (e: any) {
       console.warn('[Firebase] Local persistence failed:', e?.message);
       try {
         await setPersistence(auth, browserSessionPersistence);
-        console.log('[Firebase] Using session persistence');
+        persistenceUsed = 'session';
       } catch (e2: any) {
         console.warn('[Firebase] Session persistence failed:', e2?.message);
         await setPersistence(auth, inMemoryPersistence);
-        console.log('[Firebase] Using in-memory persistence');
+        persistenceUsed = 'in-memory';
       }
     }
+    console.log(`[Firebase] Auth ready (${persistenceUsed} persistence)`);
     authReady = true;
+    try { sessionStorage.setItem(PERSISTENCE_KEY, '1'); } catch { /* noop */ }
   })();
 
   return initPromise;

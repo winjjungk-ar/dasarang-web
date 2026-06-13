@@ -7,7 +7,7 @@ export default function FloatingPhone() {
     <div className="no-print" style={{
       position: 'fixed',
       bottom: '7rem',
-      right: '1.5rem',
+      left: '1.5rem',
       zIndex: 9999,
       display: 'flex',
       flexDirection: 'column',

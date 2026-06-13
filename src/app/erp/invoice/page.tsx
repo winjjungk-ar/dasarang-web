@@ -77,7 +77,7 @@ export default function InvoicePage() {
     if (!selHospital) { alert('병원을 선택해주세요'); return; }
     const monthPrefix = `${selYear}-${String(selMonth).padStart(2, '0')}`;
     console.log('[Invoice] Generate:', { selHospital, monthPrefix, totalRecords: records.length, sampleDates: records.slice(0,3).map(r=>r.date), sampleHospitals: [...new Set(records.map(r=>r.hospitalName))] });
-    const filtered = records.filter(r => r.date.startsWith(monthPrefix) && r.hospitalName === selHospital);
+    const filtered = records.filter(r => r.date && r.date.startsWith(monthPrefix) && r.hospitalName === selHospital);
     console.log('[Invoice] Filtered:', filtered.length);
     if (filtered.length === 0) {
       // Show what IS available to help debugging

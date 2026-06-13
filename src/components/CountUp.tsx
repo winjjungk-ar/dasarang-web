@@ -14,9 +14,11 @@ interface CountUpProps {
 }
 
 export default function CountUp({ end, suffix = '', prefix = '', duration = 2000, label, icon, color = '#4A7C59', highlight = false }: CountUpProps) {
-  const [count, setCount] = useState(0);
+  // Start at end value so SSR / initial render shows real numbers, not zeros
+  const [count, setCount] = useState(end);
   const [started, setStarted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const hasTriggered = useRef(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -24,15 +26,21 @@ export default function CountUp({ end, suffix = '', prefix = '', duration = 2000
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !started) {
-          setStarted(true);
+        if (entry.isIntersecting && !hasTriggered.current) {
+          hasTriggered.current = true;
+          // Reset to 0 first so the CountUp animation plays from scratch
+          setCount(0);
+          // Defer started=true by one microtask so React renders count=0 first
+          requestAnimationFrame(() => {
+            setStarted(true);
+          });
         }
       },
       { threshold: 0.3 }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [started]);
+  }, []);
 
   useEffect(() => {
     if (!started) return;

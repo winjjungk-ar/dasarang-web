@@ -94,7 +94,10 @@ export default function InvoicePage() {
     }
 
     const cgRateMap: Record<string, number> = {};
-    caregivers.forEach(c => { cgRateMap[c.id] = c.hourlyRate || 0; });
+    // 병원 계약단가가 있으면 우선 적용, 없으면 간병인 시급
+    const selectedHospital = hospitals.find(h => h.name === selHospital);
+    const hospitalRate = selectedHospital?.contractRate || 0;
+    caregivers.forEach(c => { cgRateMap[c.id] = hospitalRate || c.hourlyRate || 0; });
 
     const cgMap: Record<string, InvoiceItem> = {};
     filtered.forEach(r => {

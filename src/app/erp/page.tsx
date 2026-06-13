@@ -11,6 +11,9 @@ export default function ERPDashboard() {
   const [hospCount, setHospCount] = useState(0);
   const [patCount, setPatCount] = useState(0);
   const [todayCount, setTodayCount] = useState(0);
+  const [weekCount, setWeekCount] = useState(0);
+  const [activeSchedules, setActiveSchedules] = useState(0);
+  const [pendingInvoices, setPendingInvoices] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,25 +23,66 @@ export default function ERPDashboard() {
       setCgCount(cgList.length);
       setHospCount(hospList.length);
       setPatCount(patList.length);
-      const today = new Date().toISOString().split('T')[0];
+
+      // Attendance data
       const snap = await getDocs(query(collection(db, 'attendance'), orderBy('date', 'desc')));
-      let todayC = 0;
+      const today = new Date().toISOString().split('T')[0];
+      let todayC = 0, weekC = 0;
+      // Calculate this week (Mon-Sun)
+      const now = new Date();
+      const dayOfWeek = now.getDay();
+      const monday = new Date(now);
+      monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+      const weekStart = monday.toISOString().split('T')[0];
+
       snap.forEach(d => {
-        if (d.data().date === today) todayC++;
+        const dt = d.data().date;
+        if (dt === today) todayC++;
+        if (dt && dt >= weekStart) weekC++;
       });
       setTodayCount(todayC);
+      setWeekCount(weekC);
+
+      // Schedules - count active (in-progress status)
+      try {
+        const schedSnap = await getDocs(collection(db, 'schedules'));
+        let active = 0;
+        schedSnap.forEach(d => {
+          if (d.data().status === 'in-progress' || d.data().status === 'scheduled') active++;
+        });
+        setActiveSchedules(active);
+      } catch { /* schedules might not exist yet */ }
+
+      // Invoices - count pending (not paid)
+      try {
+        const invSnap = await getDocs(collection(db, 'invoices'));
+        let pending = 0;
+        invSnap.forEach(d => {
+          if (d.data().status !== 'paid') pending++;
+        });
+        setPendingInvoices(pending);
+      } catch { /* invoices might not exist yet */ }
+
       } catch (e: any) {
         console.error('Dashboard load error:', e?.message);
       } finally {
-      setLoading(false);
+        setLoading(false);
       }
     })();
   }, []);
 
+  // Summary cards
+  const summaryCards = [
+    { label: '이번주 출퇴근', value: `${weekCount}건`, icon: '⏱️', color: '#2D5A3D' },
+    { label: '오늘 출근', value: `${todayCount}명`, icon: '👤', color: '#1565C0' },
+    { label: '진행중 배차', value: `${activeSchedules}건`, icon: '📅', color: '#D84315' },
+    { label: '미수금 청구', value: `${pendingInvoices}건`, icon: '🧾', color: pendingInvoices > 0 ? '#C62828' : '#4A7C59' },
+  ];
+
   const modules = [
-    { href: '/erp/schedule', icon: '📋', title: '배차·스케줄', desc: '간병인 배정 / 일정 관리', color: '#D84315', stat: `${todayCount}건`, statLabel: '오늘 출퇴근' },
+    { href: '/erp/schedule', icon: '📋', title: '배차·스케줄', desc: '간병인 배정 / 일정 관리', color: '#D84315', stat: `${activeSchedules}건`, statLabel: '진행중' },
     { href: '/erp/attendance', icon: '⏱️', title: '출퇴근 관리', desc: '간병인 출퇴근 기록 / 통계', color: '#2D5A3D', stat: `${cgCount}명`, statLabel: '등록 간병인' },
-    { href: '/erp/invoice', icon: '🧾', title: '병원별 청구서', desc: '월간 간병비 자동 계산', color: '#1565C0', stat: '발행', statLabel: '청구서' },
+    { href: '/erp/invoice', icon: '🧾', title: '병원별 청구서', desc: '월간 간병비 자동 계산', color: '#1565C0', stat: `${pendingInvoices}건`, statLabel: '미수금' },
     { href: '/checkin', icon: '📱', title: '체크인 (QR)', desc: '간병인 핸드폰 출퇴근', color: '#1565C0', stat: '바로가기', statLabel: 'QR 스캔' },
     { href: '/documents/employment-cert', icon: '📜', title: '재직증명서', desc: '재직증명서 발급', color: '#6A1B9A', stat: '발급', statLabel: '문서 출력' },
     { href: '/documents/care-log', icon: '📋', title: '간병일지', desc: '일일 간병 기록', color: '#E65100', stat: '작성', statLabel: '일지 작성' },
@@ -62,6 +106,22 @@ export default function ERPDashboard() {
         <p style={{ color: '#888', fontSize: '0.9rem' }}>
           등록 간병인 {cgCount}명 · 병원 {hospCount}곳 · 환자 {patCount}명 · 오늘 출퇴근 {todayCount}건
         </p>
+      </div>
+
+      {/* KPI Summary Bar */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+        gap: '0.75rem', marginBottom: '1.5rem',
+      }}>
+        {summaryCards.map(card => (
+          <div key={card.label} style={{
+            padding: '1rem 1.25rem', background: 'white', borderRadius: '0.75rem',
+            border: `1px solid ${card.color}20`, display: 'flex', flexDirection: 'column', gap: '0.25rem',
+          }}>
+            <span style={{ fontSize: '0.75rem', color: '#888' }}>{card.icon} {card.label}</span>
+            <span style={{ fontSize: '1.3rem', fontWeight: 800, color: card.color }}>{card.value}</span>
+          </div>
+        ))}
       </div>
 
       <div style={{

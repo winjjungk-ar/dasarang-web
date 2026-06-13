@@ -199,7 +199,7 @@ export default function AttendancePage() {
   return (
     <div>
       {/* 탭 */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
         {(['records', 'stats'] as const).map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '0.6rem 1.5rem', borderRadius: '0.5rem', border: 'none',
@@ -209,6 +209,19 @@ export default function AttendancePage() {
             {t === 'records' ? '⏱️ 출퇴근 기록' : '📊 통계'}
           </button>
         ))}
+        <div style={{ flex: 1 }} />
+        <button onClick={() => {
+          const csv = ['날짜,간병인,병원,출근,퇴근,근무시간'].concat(
+            records.map(r => [r.date, r.caregiverName, r.hospitalName, r.clockIn, r.clockOut, r.totalHours].join(','))
+          ).join('\\n');
+          const blob = new Blob(['\\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = `attendance_${new Date().toISOString().split('T')[0]}.csv`; a.click();
+          URL.revokeObjectURL(url);
+        }} style={{
+          padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid #2D5A3D',
+          background: 'white', color: '#2D5A3D', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
+        }}>📥 CSV 다운로드</button>
       </div>
 
       {/* 간병인 필터 칩 (공통) */}

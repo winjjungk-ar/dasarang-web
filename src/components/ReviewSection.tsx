@@ -16,10 +16,12 @@ interface Review {
 }
 
 const AVATARS = ['👩', '👨', '👩‍🦰', '👴', '👵', '👩‍🦳', '👨‍🦳', '👱‍♀️', '👨‍🦰', '👩‍🦱']
+const MAX_VISIBLE = 6
 
 export default function ReviewSection() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     ;(async () => {
@@ -107,7 +109,9 @@ export default function ReviewSection() {
             gap: '1.5rem',
           }}
         >
-          {displayReviews.map((r, i) => {
+          {(() => {
+            const visibleReviews = showAll ? displayReviews : displayReviews.slice(0, MAX_VISIBLE)
+            return visibleReviews.map((r, i) => {
             const avatar = AVATARS[i % AVATARS.length]
             return (
               <div
@@ -184,8 +188,47 @@ export default function ReviewSection() {
                 </div>
               </div>
             )
-          })}
+          })})()}
         </div>
+
+        {/* Show more button */}
+        {displayReviews.length > MAX_VISIBLE && !showAll && (
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <button
+              onClick={() => setShowAll(true)}
+              style={{
+                background: 'white',
+                color: '#5B8C5A',
+                padding: '0.75rem 2rem',
+                borderRadius: '0.75rem',
+                border: '2px solid #5B8C5A',
+                fontSize: '1rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              📋 후기 더보기 ({displayReviews.length - MAX_VISIBLE}건)
+            </button>
+          </div>
+        )}
+        {showAll && displayReviews.length > MAX_VISIBLE && (
+          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+            <button
+              onClick={() => setShowAll(false)}
+              style={{
+                background: 'transparent',
+                color: '#9CA3AF',
+                padding: '0.5rem 1.5rem',
+                borderRadius: '0.75rem',
+                border: '1px solid #E0E0E0',
+                fontSize: '0.875rem',
+                cursor: 'pointer',
+              }}
+            >
+              접기 ▲
+            </button>
+          </div>
+        )}
 
         {/* Write review CTA */}
         <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>

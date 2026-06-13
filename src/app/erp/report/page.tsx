@@ -59,13 +59,16 @@ export default function ReportPage() {
       });
       setRecords(attList);
       setCaregivers(cgList);
+    }).catch((e: any) => {
+      console.error('Report page load error:', e?.message);
+    }).finally(() => {
       setLoading(false);
     });
   }, []);
 
   const summary = useMemo(() => {
     const target = `${year}-${String(month).padStart(2, '0')}`;
-    const filtered = records.filter(r => r.date.startsWith(target));
+    const filtered = records.filter(r => r.date && r.date.startsWith(target));
 
     const cgRateMap: Record<string, number> = {};
     caregivers.forEach(c => { cgRateMap[c.id] = c.hourlyRate || 0; });

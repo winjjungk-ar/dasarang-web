@@ -19,6 +19,7 @@ export default function ContractsPage() {
 
   useEffect(() => {
     (async () => {
+      try {
       const [cgList, hospList] = await Promise.all([getCaregivers(), getHospitals()]);
       setCaregivers(cgList);
       setHospitals(hospList);
@@ -30,7 +31,11 @@ export default function ContractsPage() {
       hospList.forEach(h => { hrs[h.id] = String(h.contractRate || ''); notes[h.id] = h.contractNotes || ''; });
       setEditHospRate(hrs);
       setEditHospNotes(notes);
+      } catch (e: any) {
+        console.error('Contracts page load error:', e?.message);
+      } finally {
       setLoading(false);
+      }
     })();
   }, []);
 

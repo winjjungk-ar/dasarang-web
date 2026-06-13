@@ -47,6 +47,7 @@ export default function AttendancePage() {
   // 데이터 로드
   const loadData = async () => {
     setLoading(true);
+    try {
     const [cgList, hospList, snap] = await Promise.all([
       getCaregivers(),
       getHospitals(),
@@ -57,7 +58,11 @@ export default function AttendancePage() {
     const list: Attendance[] = [];
     snap.forEach(d => list.push({ id: d.id, ...d.data() } as Attendance));
     setRecords(list);
+    } catch (e: any) {
+      console.error('Attendance page load error:', e?.message);
+    } finally {
     setLoading(false);
+    }
   };
 
   useEffect(() => { loadData(); }, []);

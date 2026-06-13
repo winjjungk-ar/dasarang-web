@@ -22,6 +22,7 @@ export default function PLPage() {
 
   useEffect(() => {
     (async () => {
+      try {
       const snap = await getDocs(query(collection(db, 'transactions'), orderBy('date', 'desc')));
       const list: Transaction[] = [];
       snap.forEach(d => {
@@ -29,7 +30,11 @@ export default function PLPage() {
         list.push({ id: d.id, date: dt.date || '', type: dt.type || 'expense', amount: dt.amount || 0, category: dt.category || '', note: dt.note || '' });
       });
       setTransactions(list);
+      } catch (e: any) {
+        console.error('P&L page load error:', e?.message);
+      } finally {
       setLoading(false);
+      }
     })();
   }, []);
 

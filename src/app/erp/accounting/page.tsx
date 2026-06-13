@@ -55,7 +55,7 @@ export default function AccountingPage() {
   // 월별 필터
   const monthPrefix = `${selYear}-${String(selMonth).padStart(2, '0')}`;
   const filtered = useMemo(() =>
-    transactions.filter(t => t.date.startsWith(monthPrefix)),
+    transactions.filter(t => t.date && t.date.startsWith(monthPrefix)),
     [transactions, monthPrefix]);
 
   const summary = useMemo(() => {

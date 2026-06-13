@@ -28,6 +28,7 @@ export default function PayrollPage() {
 
   useEffect(() => {
     (async () => {
+      try {
       const [cgList, snap] = await Promise.all([
         getCaregivers(),
         getDocs(query(collection(db, 'attendance'), orderBy('date', 'desc'))),
@@ -40,14 +41,18 @@ export default function PayrollPage() {
       const rates: Record<string, number> = {};
       cgList.forEach(c => { rates[c.id] = c.hourlyRate || 0; });
       setEditRates(rates);
+      } catch (e: any) {
+        console.error('Payroll page load error:', e?.message);
+      } finally {
       setLoading(false);
+      }
     })();
   }, []);
 
   // 해당 월 출퇴근
   const monthPrefix = `${selYear}-${String(selMonth).padStart(2, '0')}`;
   const monthRecords = useMemo(() =>
-    records.filter(r => r.date.startsWith(monthPrefix)),
+    records.filter(r => r.date && r.date.startsWith(monthPrefix)),
     [records, monthPrefix]);
 
   // 간병인별 집계

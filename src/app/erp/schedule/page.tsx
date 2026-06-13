@@ -50,6 +50,7 @@ export default function SchedulePage() {
 
   useEffect(() => {
     (async () => {
+      try {
       const [cgList, hospList, patList, snap] = await Promise.all([
         getCaregivers(), getHospitals(), getPatients(),
         getDocs(query(collection(db, 'schedules'), orderBy('startDate', 'desc'))),
@@ -60,7 +61,11 @@ export default function SchedulePage() {
       const list: Schedule[] = [];
       snap.forEach(d => list.push({ id: d.id, ...d.data() } as Schedule));
       setSchedules(list);
+      } catch (e: any) {
+        console.error('Schedule page load error:', e?.message);
+      } finally {
       setLoading(false);
+      }
     })();
   }, []);
 

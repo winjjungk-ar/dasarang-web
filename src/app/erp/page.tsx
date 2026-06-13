@@ -15,6 +15,7 @@ export default function ERPDashboard() {
 
   useEffect(() => {
     (async () => {
+      try {
       const [cgList, hospList, patList] = await Promise.all([getCaregivers(), getHospitals(), getPatients()]);
       setCgCount(cgList.length);
       setHospCount(hospList.length);
@@ -26,7 +27,11 @@ export default function ERPDashboard() {
         if (d.data().date === today) todayC++;
       });
       setTodayCount(todayC);
+      } catch (e: any) {
+        console.error('Dashboard load error:', e?.message);
+      } finally {
       setLoading(false);
+      }
     })();
   }, []);
 
